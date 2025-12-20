@@ -1,5 +1,5 @@
 
-export type Role = 'Dad' | 'Son';
+export type Role = 'Dad' | 'Mum' | 'Son' | 'Daughter';
 
 export interface User {
   id: string;

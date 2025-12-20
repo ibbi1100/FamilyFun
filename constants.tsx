@@ -2,7 +2,9 @@
 import { Activity, MonsterPart } from './types';
 
 export const DAD_AVATAR = "https://lh3.googleusercontent.com/aida-public/AB6AXuA8RelFBF05jBD9F6D3IUDAHT_11EVDEDHw2m8-nCfycP1C5K4AoHNNXlKjSMfJtBAWg3YKXpzjJhXlZva-t-vptgamsXXGk3WIezIBJMiuWUPw45YIR9rAwwuZGZ0fpcGn4HVGV-FI6EHpjgKsPxjeakfeEcinXh-HIji736C6nMjBTtWD2pZfdwEndWnxrGWV8bdNIU5AF-gjru4EBy576bLWgYWxe2ehQJs8hzCMASrTfXsluxj4acM-DwLyxSth1KRzQTZ7k2c";
+export const MUM_AVATAR = "https://lh3.googleusercontent.com/aida-public/AB6AXuA8RelFBF05jBD9F6D3IUDAHT_11EVDEDHw2m8-nCfycP1C5K4AoHNNXlKjSMfJtBAWg3YKXpzjJhXlZva-t-vptgamsXXGk3WIezIBJMiuWUPw45YIR9rAwwuZGZ0fpcGn4HVGV-FI6EHpjgKsPxjeakfeEcinXh-HIji736C6nMjBTtWD2pZfdwEndWnxrGWV8bdNIU5AF-gjru4EBy576bLWgYWxe2ehQJs8hzCMASrTfXsluxj4acM-DwLyxSth1KRzQTZ7k2c"; // Using Dad's as placeholder
 export const SON_AVATAR = "https://lh3.googleusercontent.com/aida-public/AB6AXuBwXkgWPF2ox8Wqr-Q_OlHMrjvRT5Vy3aAhO4BRZCDTYF9gXVK6dpryCgUMg58Sg-Ftwm-J33Puf1diwjC_erlsp_4SagWXP9r4TmemtXlRJjmynik-KV4XAJ2r1McM5JvDIpqBIebII9EG4cu2rRHLDnr7NBr_6ur7rZ-Z5l4OtmPJtdXhllnX9aGyh3pjyv71JT9reI0J5EdkmaohtgAI8-L6eCfUc7lqBq1g9rjR99ZODtLEZ9JM0otc9szlE0HL3iMBYZ2y4v4";
+export const DAUGHTER_AVATAR = "https://lh3.googleusercontent.com/aida-public/AB6AXuBwXkgWPF2ox8Wqr-Q_OlHMrjvRT5Vy3aAhO4BRZCDTYF9gXVK6dpryCgUMg58Sg-Ftwm-J33Puf1diwjC_erlsp_4SagWXP9r4TmemtXlRJjmynik-KV4XAJ2r1McM5JvDIpqBIebII9EG4cu2rRHLDnr7NBr_6ur7rZ-Z5l4OtmPJtdXhllnX9aGyh3pjyv71JT9reI0J5EdkmaohtgAI8-L6eCfUc7lqBq1g9rjR99ZODtLEZ9JM0otc9szlE0HL3iMBYZ2y4v4"; // Using Son's as placeholder
 
 export const INITIAL_MISSIONS: Activity[] = [
   {

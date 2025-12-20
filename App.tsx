@@ -13,7 +13,7 @@ import AdventureHub from './components/AdventureHub';
 import BottomNav from './components/BottomNav';
 import LoginScreen from './components/LoginScreen';
 import { NavTab, Activity, AppScreen, SavedMonster, User } from './types';
-import { INITIAL_MISSIONS, SON_AVATAR, DAD_AVATAR } from './constants';
+import { INITIAL_MISSIONS, SON_AVATAR, DAD_AVATAR, MUM_AVATAR, DAUGHTER_AVATAR } from './constants';
 
 import { supabase } from './lib/supabase';
 
@@ -30,9 +30,22 @@ const App: React.FC = () => {
   const [level, setLevel] = useState(1);
   const [loading, setLoading] = useState(true);
 
-  const otherUser = currentUser?.role === 'Dad'
-    ? { name: 'Super Son', avatar: SON_AVATAR, role: 'Son' }
-    : { name: 'Captain Dad', avatar: DAD_AVATAR, role: 'Dad' };
+  const getOtherUser = () => {
+    switch (currentUser?.role) {
+      case 'Dad':
+        return { name: 'Super Son', avatar: SON_AVATAR, role: 'Son' }; // Default pair
+      case 'Mum':
+        return { name: 'Wonder Daughter', avatar: DAUGHTER_AVATAR, role: 'Daughter' }; // Default pair
+      case 'Son':
+        return { name: 'Captain Dad', avatar: DAD_AVATAR, role: 'Dad' };
+      case 'Daughter':
+        return { name: 'Super Mum', avatar: MUM_AVATAR, role: 'Mum' };
+      default:
+        return { name: 'Captain Dad', avatar: DAD_AVATAR, role: 'Dad' };
+    }
+  };
+
+  const otherUser = getOtherUser();
 
   // Auth & Profile Management
   useEffect(() => {

@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Role, User } from '../types';
-import { DAD_AVATAR, SON_AVATAR } from '../constants';
+import { DAD_AVATAR, SON_AVATAR, MUM_AVATAR, DAUGHTER_AVATAR } from '../constants';
 import { supabase } from '../lib/supabase';
 
 interface LoginScreenProps {
@@ -31,9 +31,9 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
           options: {
             emailRedirectTo: window.location.origin,
             data: {
-              name: name || (role === 'Dad' ? 'Captain Dad' : 'Super Son'),
+              name: name || (role === 'Dad' ? 'Captain Dad' : role === 'Mum' ? 'Super Mum' : role === 'Son' ? 'Super Son' : 'Wonder Daughter'),
               role: role,
-              avatar: role === 'Dad' ? DAD_AVATAR : SON_AVATAR
+              avatar: role === 'Dad' ? DAD_AVATAR : role === 'Mum' ? MUM_AVATAR : role === 'Son' ? SON_AVATAR : DAUGHTER_AVATAR
             }
           },
         });
@@ -42,11 +42,11 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
 
         if (authData.user) {
           // Profile is created automatically via Supabase Trigger
-          const avatar = role === 'Dad' ? DAD_AVATAR : SON_AVATAR;
+          const avatar = role === 'Dad' ? DAD_AVATAR : role === 'Mum' ? MUM_AVATAR : role === 'Son' ? SON_AVATAR : DAUGHTER_AVATAR;
 
           onLogin({
             id: authData.user.id,
-            name: name || (role === 'Dad' ? 'Captain Dad' : 'Super Son'),
+            name: name || (role === 'Dad' ? 'Captain Dad' : role === 'Mum' ? 'Super Mum' : role === 'Son' ? 'Super Son' : 'Wonder Daughter'),
             role: role,
             avatar: avatar
           });
@@ -143,12 +143,12 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
                 <div className="space-y-1">
                   <label className="text-[10px] font-black uppercase tracking-widest text-primary/80 ml-1">Role</label>
                   <div className="flex gap-2">
-                    {(['Dad', 'Son'] as const).map((r) => (
+                    {(['Dad', 'Mum', 'Son', 'Daughter'] as const).map((r) => (
                       <button
                         key={r}
                         type="button"
                         onClick={() => setRole(r)}
-                        className={`flex-1 py-3 rounded-xl border border-white/10 text-sm font-bold transition-all ${role === r ? 'bg-white/20 border-primary/50 text-white' : 'bg-black/20 text-gray-400 hover:bg-black/30'}`}
+                        className={`flex-1 py-3 rounded-xl border border-white/10 text-xs font-bold transition-all ${role === r ? 'bg-white/20 border-primary/50 text-white' : 'bg-black/20 text-gray-400 hover:bg-black/30'}`}
                       >
                         {r}
                       </button>

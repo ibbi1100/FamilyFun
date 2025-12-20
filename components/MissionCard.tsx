@@ -33,6 +33,28 @@ const MissionCard: React.FC<MissionCardProps> = ({ mission, onComplete, isHistor
           title: "Son's Task",
           initial: 'S'
         };
+      case 'Mum':
+        return {
+          bar: 'bg-teal-500',
+          badge: 'bg-teal-100 text-teal-700',
+          label: 'text-teal-500 dark:text-teal-400',
+          bg: 'bg-teal-500/5',
+          border: 'border-teal-500/10',
+          xpText: 'text-teal-600 dark:text-teal-300',
+          title: "Mum's Task",
+          initial: 'M'
+        };
+      case 'Daughter':
+        return {
+          bar: 'bg-pink-500',
+          badge: 'bg-pink-100 text-pink-700',
+          label: 'text-pink-500 dark:text-pink-400',
+          bg: 'bg-pink-500/5',
+          border: 'border-pink-500/10',
+          xpText: 'text-pink-600 dark:text-pink-300',
+          title: "Daughter's Task",
+          initial: 'D'
+        };
       default:
         return {
           bar: 'bg-purple-600',
@@ -96,7 +118,7 @@ const MissionCard: React.FC<MissionCardProps> = ({ mission, onComplete, isHistor
             </p>
           </div>
           <div className="mt-6">
-            <button 
+            <button
               onClick={() => onComplete(mission.id)}
               className="w-full bg-gray-100 hover:bg-primary dark:bg-white/5 dark:hover:bg-primary text-black dark:text-white dark:hover:text-black transition-all py-4 px-6 rounded-2xl flex items-center justify-center gap-3 font-black text-sm uppercase tracking-widest active:scale-95 border border-black/5 dark:border-white/5"
             >
