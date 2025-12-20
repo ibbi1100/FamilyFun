@@ -21,7 +21,7 @@ import { supabase } from './lib/supabase';
 
 const App: React.FC = () => {
   useEffect(() => {
-    console.log("App Version: v1.3 - 409 Conflict Retry Logic - " + new Date().toISOString());
+    console.log("App Version: v1.4 - Build Fix (PostgrestError) - " + new Date().toISOString());
   }, []);
 
   const [activeTab, setActiveTab] = useState<NavTab>(NavTab.Active);
