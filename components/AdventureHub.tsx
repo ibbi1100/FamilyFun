@@ -35,6 +35,22 @@ const AdventureHub: React.FC<AdventureHubProps> = ({ onNavigate, savedMonsterCou
       shadow: 'shadow-purple-500/20'
     },
     {
+      id: AppScreen.ScavengerHunt,
+      title: 'Scavenger Hunt',
+      subtitle: 'Find items IRL!',
+      icon: 'search_check',
+      color: 'bg-gradient-to-br from-yellow-500 to-orange-600',
+      shadow: 'shadow-yellow-500/20'
+    },
+    {
+      id: AppScreen.MysteryJar,
+      title: 'Mystery Jar',
+      subtitle: 'Boredom Buster',
+      icon: 'cookie',
+      color: 'bg-gradient-to-br from-teal-500 to-emerald-600',
+      shadow: 'shadow-teal-500/20'
+    },
+    {
       id: AppScreen.Main,
       title: 'Chaos Missions',
       subtitle: 'Earn Massive XP',

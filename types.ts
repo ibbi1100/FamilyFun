@@ -29,6 +29,8 @@ export enum AppScreen {
   PlayerStats = 'PlayerStats',
   SillySoundboard = 'SillySoundboard',
   StoryStarter = 'StoryStarter',
+  ScavengerHunt = 'ScavengerHunt',
+  MysteryJar = 'MysteryJar',
   Hub = 'Hub',
   Login = 'Login'
 }

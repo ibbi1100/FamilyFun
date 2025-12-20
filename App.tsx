@@ -12,6 +12,8 @@ import StoryStarter from './components/StoryStarter';
 import AdventureHub from './components/AdventureHub';
 import BottomNav from './components/BottomNav';
 import LoginScreen from './components/LoginScreen';
+import ScavengerHunt from './components/ScavengerHunt';
+import MysteryJar from './components/MysteryJar';
 import { NavTab, Activity, AppScreen, SavedMonster, User } from './types';
 import { INITIAL_MISSIONS, SON_AVATAR, DAD_AVATAR, MUM_AVATAR, DAUGHTER_AVATAR } from './constants';
 
@@ -262,6 +264,10 @@ const App: React.FC = () => {
         return <SillySoundboard />;
       case AppScreen.StoryStarter:
         return <StoryStarter />;
+      case AppScreen.ScavengerHunt:
+        return <ScavengerHunt onBack={() => setCurrentScreen(AppScreen.Hub)} />;
+      case AppScreen.MysteryJar:
+        return <MysteryJar onBack={() => setCurrentScreen(AppScreen.Hub)} />;
       case AppScreen.Main:
       default:
         return (
