@@ -21,7 +21,7 @@ import { supabase } from './lib/supabase';
 
 const App: React.FC = () => {
   useEffect(() => {
-    console.log("App Version: v1.4 - Build Fix (PostgrestError) - " + new Date().toISOString());
+    console.log("App Version: v1.5 - Build Fix (PostgrestError Retry) - " + new Date().toISOString());
   }, []);
 
   const [activeTab, setActiveTab] = useState<NavTab>(NavTab.Active);
@@ -120,7 +120,8 @@ const App: React.FC = () => {
 
         if (createError) {
           // Check for Conflict (409) or Unique Violation (23505)
-          if (createError.code === '23505' || createError.status === 409) {
+          const err = createError as any;
+          if (err.code === '23505' || err.status === 409) {
             console.log("Profile already exists (409 Conflict). Retrying fetch...");
             if (retryCount < 3) {
               // Wait a moment and retry fetch
