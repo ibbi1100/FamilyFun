@@ -52,6 +52,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
               .from('profiles')
               .select('*')
               .eq('id', authData.user.id)
+              .limit(1)
               .maybeSingle();
             if (data) profile = data;
             retries--;
@@ -84,6 +85,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
             .from('profiles')
             .select('*')
             .eq('id', authData.user.id)
+            .limit(1)
             .maybeSingle();
 
           if (profileError) throw profileError;

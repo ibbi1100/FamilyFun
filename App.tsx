@@ -77,14 +77,21 @@ const App: React.FC = () => {
 
   const fetchProfile = async (userId: string) => {
     try {
+      console.log("Fetching profile for:", userId);
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
+        .limit(1)
         .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase Profile Error:", error);
+        throw error;
+      };
+
       if (data) {
+        console.log("Profile found:", data.name);
         setCurrentUser({
           id: data.id,
           name: data.name,
