@@ -81,7 +81,7 @@ const App: React.FC = () => {
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       if (data) {
@@ -93,6 +93,8 @@ const App: React.FC = () => {
         });
         setTotalXP(data.xp || 0);
         setLevel(data.level || 1);
+      } else {
+        console.warn("User logged in but no profile found.");
       }
     } catch (error) {
       console.error('Error fetching profile:', error);

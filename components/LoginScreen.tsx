@@ -29,7 +29,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
           email,
           password,
           options: {
-            emailRedirectTo: window.location.origin,
+            // Remove emailRedirectTo if running strictly local/PWA to avoid redirect confusion
+            // emailRedirectTo: window.location.origin, 
             data: {
               name: name || (role === 'Dad' ? 'Captain Dad' : role === 'Mum' ? 'Super Mum' : role === 'Son' ? 'Super Son' : 'Wonder Daughter'),
               role: role,
@@ -41,15 +42,33 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
         if (authError) throw authError;
 
         if (authData.user) {
-          // Profile is created automatically via Supabase Trigger
-          const avatar = role === 'Dad' ? DAD_AVATAR : role === 'Mum' ? MUM_AVATAR : role === 'Son' ? SON_AVATAR : DAUGHTER_AVATAR;
+          // Poll for profile creation (Trigger latency)
+          let retries = 5;
+          let profile = null;
 
-          onLogin({
-            id: authData.user.id,
-            name: name || (role === 'Dad' ? 'Captain Dad' : role === 'Mum' ? 'Super Mum' : role === 'Son' ? 'Super Son' : 'Wonder Daughter'),
-            role: role,
-            avatar: avatar
-          });
+          while (retries > 0 && !profile) {
+            await new Promise(r => setTimeout(r, 1000)); // Wait 1s
+            const { data } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', authData.user.id)
+              .maybeSingle();
+            if (data) profile = data;
+            retries--;
+          }
+
+          if (profile) {
+            onLogin({
+              id: profile.id,
+              name: profile.name,
+              role: profile.role as Role,
+              avatar: profile.avatar
+            });
+          } else {
+            // Profile creation timed out (but user created)
+            setError("Account created! Please try logging in now.");
+            setIsSignUp(false);
+          }
         }
       } else {
         // Login Flow
@@ -77,20 +96,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
               avatar: profile.avatar
             });
           } else {
-            // Profile missing (shouldn't happen with triggers, but handling legacy/error cases)
-            // Ideally we'd create it here, but for now let's just show a clear error
             throw new Error('Profile not found. Please contact support or try signing up again.');
-          }
-
-          if (profileError) throw profileError;
-
-          if (profile) {
-            onLogin({
-              id: profile.id,
-              name: profile.name,
-              role: profile.role as Role,
-              avatar: profile.avatar
-            });
           }
         }
       }
