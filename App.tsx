@@ -100,7 +100,33 @@ const App: React.FC = () => {
         setTotalXP(data.xp || 0);
         setLevel(data.level || 1);
       } else {
-        console.warn("User logged in but no profile found.");
+        console.warn("User logged in but no profile found. Auto-healing...");
+
+        const { data: newProfileData, error: createError } = await supabase
+          .from('profiles')
+          .insert([{
+            id: userId,
+            name: 'Adventurer',
+            role: 'Son',
+            avatar: SON_AVATAR
+          }])
+          .select()
+          .limit(1);
+
+        if (createError) {
+          console.error("Failed to auto-heal in App:", createError);
+        } else if (newProfileData && newProfileData.length > 0) {
+          const newProfile = newProfileData[0];
+          setCurrentUser({
+            id: newProfile.id,
+            name: newProfile.name,
+            role: newProfile.role as any,
+            avatar: newProfile.avatar
+          });
+          setTotalXP(0);
+          setLevel(1);
+          setNotification("Profile restored! Welcome back.");
+        }
       }
     } catch (error) {
       console.error('Error fetching profile:', error);

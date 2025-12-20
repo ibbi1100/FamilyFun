@@ -106,7 +106,6 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
                 id: authData.user.id,
                 name: 'Adventurer', // Fallback name
                 role: 'Son',        // Fallback role
-                email: authData.user.email,
                 avatar: SON_AVATAR
               }])
               .select()
