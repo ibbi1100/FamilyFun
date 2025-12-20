@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect, useRef } from 'react';
-import { GoogleGenAI } from "@google/genai";
+import React, { useState, useRef } from 'react';
+import { getGroqCompletion } from '../lib/groq';
 
 const CHARACTERS = [
   { name: 'Sneezing Dragon', icon: 'face_6', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300' },
@@ -37,7 +37,7 @@ const StoryStarter: React.FC = () => {
 
   const spin = async () => {
     if (isSpinning) return;
-    
+
     setIsSpinning(true);
     setIsGenerating(false);
     setFullStory([]);
@@ -63,20 +63,16 @@ const StoryStarter: React.FC = () => {
   const generateStoryPrompt = async () => {
     setIsGenerating(true);
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       const char = CHARACTERS[indices[0]].name;
       const set = SETTINGS[indices[1]].name;
       const evt = EVENTS[indices[2]].name;
 
-      const prompt = mode === 'Chaos' 
+      const prompt = mode === 'Chaos'
         ? `Create a 1-sentence incredibly wacky and bizarre story starter about a ${char} in a ${set} who ${evt}.`
         : `Create a 1-sentence funny story starter for kids about a ${char} in a ${set} who ${evt}.`;
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: prompt
-      });
-      setFullStory([response.text || "Once upon a time..."]);
+      const text = await getGroqCompletion(prompt, 100);
+      setFullStory([text || "Once upon a time..."]);
     } catch (error) {
       setFullStory(["A story began in a mysterious way!"]);
     } finally {
@@ -88,15 +84,12 @@ const StoryStarter: React.FC = () => {
     if (isGenerating || fullStory.length === 0) return;
     setIsGenerating(true);
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       const currentStory = fullStory.join(" ");
-      
-      const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: `Given this story start: "${currentStory}", add ONE crazy and unexpected sentence that continues the plot. Keep it family friendly but wild.`
-      });
-      
-      setFullStory(prev => [...prev, response.text || "And then it got even weirder!"]);
+      const prompt = `Given this story start: "${currentStory}", add ONE crazy and unexpected sentence that continues the plot. Keep it family friendly but wild.`;
+
+      const text = await getGroqCompletion(prompt, 100);
+
+      setFullStory(prev => [...prev, text || "And then it got even weirder!"]);
     } catch (error) {
       setFullStory(prev => [...prev, "Something else happened!"]);
     } finally {
@@ -123,7 +116,7 @@ const StoryStarter: React.FC = () => {
 
       <div className="flex bg-gray-100 dark:bg-white/5 p-1 rounded-full mb-6 w-full max-w-[280px]">
         {(['Classic', 'Chaos'] as const).map(m => (
-          <button 
+          <button
             key={m}
             onClick={() => setMode(m)}
             className={`flex-1 py-2 px-4 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${mode === m ? 'bg-black dark:bg-white text-white dark:text-black shadow-lg' : 'text-gray-500'}`}
@@ -135,7 +128,7 @@ const StoryStarter: React.FC = () => {
 
       <div className="w-full mb-8 relative">
         <div className="absolute top-1/2 left-0 w-full h-[70px] -translate-y-1/2 bg-primary/20 border-y-4 border-primary z-0 rounded-2xl"></div>
-        
+
         <div className="flex justify-between items-center relative z-0 py-8 gap-2">
           {[
             { label: 'Who?', items: CHARACTERS, idx: 0 },
@@ -156,7 +149,7 @@ const StoryStarter: React.FC = () => {
       </div>
 
       <div className="w-full px-2 mb-8">
-        <button 
+        <button
           onClick={spin}
           disabled={isSpinning}
           className="group relative w-full overflow-hidden rounded-3xl bg-primary text-black h-16 shadow-xl active:translate-y-1 transition-all disabled:opacity-50"
@@ -182,15 +175,15 @@ const StoryStarter: React.FC = () => {
                 </p>
               ))}
             </div>
-            
+
             <div className="mt-8 flex flex-col gap-3">
-              <button 
+              <button
                 onClick={continueStory}
                 disabled={isGenerating}
                 className="w-full bg-black dark:bg-white text-white dark:text-black py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all"
               >
                 <span className="material-symbols-outlined">auto_fix_high</span>
-                {isGenerating ? "Gemini is Writing..." : "Add More Crazy!"}
+                {isGenerating ? "Groq is Writing..." : "Add More Crazy!"}
               </button>
               <button className="w-full bg-primary/10 text-primary-dark font-black text-xs py-3 rounded-xl">
                 Save to Library
