@@ -82,8 +82,7 @@ const App: React.FC = () => {
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .limit(1)
-        .maybeSingle();
+        .limit(1);
 
       if (error) {
         console.error("Supabase Profile Error:", error);

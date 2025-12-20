@@ -100,7 +100,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
           } else {
             console.warn("User exists but profile missing. Auto-healing...");
             // Auto-heal: Create default profile
-            const { data: newProfile, error: createError } = await supabase
+            const { data: newProfileData, error: createError } = await supabase
               .from('profiles')
               .insert([{
                 id: authData.user.id,
@@ -110,7 +110,9 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
                 avatar: SON_AVATAR
               }])
               .select()
-              .single();
+              .limit(1);
+
+            const newProfile = (newProfileData && newProfileData.length > 0) ? newProfileData[0] : null;
 
             if (createError) {
               console.error("Failed to auto-heal profile:", createError);
