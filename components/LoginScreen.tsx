@@ -52,9 +52,9 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
               .from('profiles')
               .select('*')
               .eq('id', authData.user.id)
-              .limit(1)
-              .maybeSingle();
-            if (data) profile = data;
+              .limit(1);
+
+            if (data && data.length > 0) profile = data[0];
             retries--;
           }
 
@@ -81,16 +81,16 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
         if (authError) throw authError;
 
         if (authData.user) {
-          const { data: profile, error: profileError } = await supabase
+          const { data: profiles, error: profileError } = await supabase
             .from('profiles')
             .select('*')
             .eq('id', authData.user.id)
-            .limit(1)
-            .maybeSingle();
+            .limit(1);
 
           if (profileError) throw profileError;
 
-          if (profile) {
+          if (profiles && profiles.length > 0) {
+            const profile = profiles[0];
             onLogin({
               id: profile.id,
               name: profile.name,
