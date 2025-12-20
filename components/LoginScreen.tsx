@@ -30,25 +30,19 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
           password,
           options: {
             emailRedirectTo: window.location.origin,
+            data: {
+              name: name || (role === 'Dad' ? 'Captain Dad' : 'Super Son'),
+              role: role,
+              avatar: role === 'Dad' ? DAD_AVATAR : SON_AVATAR
+            }
           },
         });
 
         if (authError) throw authError;
 
         if (authData.user) {
+          // Profile is created automatically via Supabase Trigger
           const avatar = role === 'Dad' ? DAD_AVATAR : SON_AVATAR;
-          const { error: profileError } = await supabase
-            .from('profiles')
-            .insert([
-              {
-                id: authData.user.id,
-                name: name || (role === 'Dad' ? 'Captain Dad' : 'Super Son'),
-                role: role,
-                avatar: avatar
-              }
-            ]);
-
-          if (profileError) throw profileError;
 
           onLogin({
             id: authData.user.id,
