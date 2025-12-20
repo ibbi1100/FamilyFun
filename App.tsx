@@ -93,16 +93,17 @@ const App: React.FC = () => {
         throw error;
       };
 
-      if (data) {
-        console.log("Profile found:", data.name);
+      if (data && data.length > 0) {
+        const profile = data[0];
+        console.log("Profile found:", profile.name);
         setCurrentUser({
-          id: data.id,
-          name: data.name,
-          role: data.role as any,
-          avatar: data.avatar
+          id: profile.id,
+          name: profile.name,
+          role: profile.role as any,
+          avatar: profile.avatar
         });
-        setTotalXP(data.xp || 0);
-        setLevel(data.level || 1);
+        setTotalXP(profile.xp || 0);
+        setLevel(profile.level || 1);
       } else {
         console.warn("User logged in but no profile found. Auto-healing...");
 
