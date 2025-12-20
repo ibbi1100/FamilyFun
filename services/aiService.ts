@@ -32,12 +32,12 @@ export const generateCrazyChallenge = async (): Promise<Activity> => {
       emoji: emoji
     };
   } catch (error) {
-    console.error("AI Generation Error:", error);
-    // Fallback if AI fails
+    console.error("AI Generation Error (CAUGHT):", error);
+    // Explicit Fallback
     return {
       id: Math.random().toString(36).substr(2, 9),
-      title: "Dance Off!",
-      description: "Do your best robot dance for 30 seconds.",
+      title: "Dance Off (Fallback)",
+      description: "Do your best robot dance for 30 seconds. (AI unavailable)",
       duration: "30s",
       xp: 50,
       owner: owner as 'Dad' | 'Son' | 'Shared',

@@ -8,8 +8,9 @@ export const groq = new Groq({
 });
 
 export const getGroqCompletion = async (prompt: string, maxTokens: number = 100) => {
-    if (!apiKey) {
-        throw new Error("Groq API Key is missing");
+    if (!apiKey || apiKey === "undefined") {
+        console.warn("Groq API Key is missing. Returning empty.");
+        throw new Error("Groq API Key is missing or invalid");
     }
 
     try {
