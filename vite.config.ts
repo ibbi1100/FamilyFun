@@ -1,9 +1,35 @@
 
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
+      manifest: {
+        name: 'Adventure Portal',
+        short_name: 'FamilyFun',
+        description: 'Connect with your family and start the chaos!',
+        theme_color: '#57f906',
+        background_color: '#16230f',
+        display: 'standalone',
+        orientation: 'portrait',
+        scope: '/',
+        start_url: '/',
+        icons: [
+          {
+            src: 'icon.svg',
+            sizes: 'any',
+            type: 'image/svg+xml',
+            purpose: 'any maskable'
+          }
+        ]
+      }
+    })
+  ],
   define: {
     'process.env.API_KEY': JSON.stringify(process.env.API_KEY || '')
   },
