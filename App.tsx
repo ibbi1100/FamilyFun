@@ -20,6 +20,10 @@ import { INITIAL_MISSIONS, SON_AVATAR, DAD_AVATAR, MUM_AVATAR, DAUGHTER_AVATAR }
 import { supabase } from './lib/supabase';
 
 const App: React.FC = () => {
+  useEffect(() => {
+    console.log("App Version: v1.1 - Auto-Heal Fix (No Email) - " + new Date().toISOString());
+  }, []);
+
   const [activeTab, setActiveTab] = useState<NavTab>(NavTab.Active);
   const [currentScreen, setCurrentScreen] = useState<AppScreen>(AppScreen.Hub);
   const [activeMissions, setActiveMissions] = useState<Activity[]>([]);
