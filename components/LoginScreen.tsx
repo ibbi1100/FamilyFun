@@ -65,7 +65,22 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
             .from('profiles')
             .select('*')
             .eq('id', authData.user.id)
-            .single();
+            .maybeSingle();
+
+          if (profileError) throw profileError;
+
+          if (profile) {
+            onLogin({
+              id: profile.id,
+              name: profile.name,
+              role: profile.role as Role,
+              avatar: profile.avatar
+            });
+          } else {
+            // Profile missing (shouldn't happen with triggers, but handling legacy/error cases)
+            // Ideally we'd create it here, but for now let's just show a clear error
+            throw new Error('Profile not found. Please contact support or try signing up again.');
+          }
 
           if (profileError) throw profileError;
 
