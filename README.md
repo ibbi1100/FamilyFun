@@ -1,20 +1,60 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Chaos Control ⚡️
 
-# Run and deploy your AI Studio app
+A gamified family mission app powered by Google Gemini AI.
 
-This contains everything you need to run your app locally.
+## Features
 
-View your app in AI Studio: https://ai.studio/apps/drive/1M_lP89f79KsGwok9WucRp4hwfKP_iv3I
+- **Chaos Missions**: AI-generated challenges for Dads and Sons.
+- **Monster Mashup**: Create silly monsters with randomized parts.
+- **Story Spinner**: AI-powered interactive storytelling.
+- **Silly Soundboard**: Synthesized sound effects engine.
+- **Player Stats**: Track XP, streaks, and levels.
 
-## Run Locally
+## Tech Stack
 
-**Prerequisites:**  Node.js
+- React 19
+- TypeScript
+- Vite
+- Tailwind CSS
+- Google Gemini API
 
+## Setup
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+1. **Clone the repo**
+   ```bash
+   git clone <repo-url>
+   cd adventure-portal
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Environment Variables**
+   Create a `.env` file in the root directory:
+   ```env
+   API_KEY=your_google_gemini_api_key
+   ```
+
+4. **Run Development Server**
+   ```bash
+   npm run dev
+   ```
+
+## Deployment (Docker/Dokploy)
+
+This project includes a `Dockerfile` and `nginx.conf` for easy deployment.
+
+1. **Build Args**: Ensure you pass `API_KEY` as a build argument or environment variable during the build process in your deployment platform.
+2. **Port**: The container exposes port `80`.
+
+### Docker Build Command
+```bash
+docker build --build-arg API_KEY=your_key_here -t chaos-control .
+```
+
+### Docker Run Command
+```bash
+docker run -p 3000:80 chaos-control
+```

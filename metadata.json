@@ -1,5 +1,9 @@
 {
-  "name": "Adventure Portal",
-  "description": "A gamified bonding application for families to embark on missions, solve puzzles, and discover daily adventures together.",
-  "requestFramePermissions": []
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ],
+  "name": "",
+  "description": ""
 }
