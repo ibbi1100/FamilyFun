@@ -21,7 +21,7 @@ import { supabase } from './lib/supabase';
 
 const App: React.FC = () => {
   useEffect(() => {
-    console.log("App Version: v1.1 - Auto-Heal Fix (No Email) - " + new Date().toISOString());
+    console.log("App Version: v1.2 - Re-verified index.html & Auth - " + new Date().toISOString());
   }, []);
 
   const [activeTab, setActiveTab] = useState<NavTab>(NavTab.Active);
