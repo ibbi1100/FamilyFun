@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Role, User } from '../types';
 import { DAD_AVATAR, SON_AVATAR } from '../constants';
+import { supabase } from '../lib/supabase';
 
 interface LoginScreenProps {
   onLogin: (user: User) => void;
@@ -9,29 +10,84 @@ interface LoginScreenProps {
 
 const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
   const [isAuthenticating, setIsAuthenticating] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [role, setRole] = useState<Role>('Son');
+  const [error, setError] = useState<string | null>(null);
 
-  const users: User[] = [
-    { id: '1', name: 'Captain Dad', role: 'Dad', avatar: DAD_AVATAR },
-    { id: '2', name: 'Super Son', role: 'Son', avatar: SON_AVATAR }
-  ];
-
-  const handleIdentityLogin = (user: User) => {
-    setSelectedUserId(user.id);
+  const handleAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
     setIsAuthenticating(true);
-    // Simulate a brief authentication verification
-    setTimeout(() => {
-      onLogin(user);
-    }, 800);
-  };
+    setError(null);
 
-  const handleGoogleLogin = () => {
-    setIsAuthenticating(true);
-    // Simulate Google OAuth flow
-    setTimeout(() => {
-      // Defaulting to the first user for the demo "Sign in with Google" flow
-      onLogin(users[0]);
-    }, 1500);
+    try {
+      if (isSignUp) {
+        // Sign Up Flow
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email,
+          password,
+        });
+
+        if (authError) throw authError;
+
+        if (authData.user) {
+          const avatar = role === 'Dad' ? DAD_AVATAR : SON_AVATAR;
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .insert([
+              {
+                id: authData.user.id,
+                name: name || (role === 'Dad' ? 'Captain Dad' : 'Super Son'),
+                role: role,
+                avatar: avatar
+              }
+            ]);
+
+          if (profileError) throw profileError;
+
+          onLogin({
+            id: authData.user.id,
+            name: name || (role === 'Dad' ? 'Captain Dad' : 'Super Son'),
+            role: role,
+            avatar: avatar
+          });
+        }
+      } else {
+        // Login Flow
+        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (authError) throw authError;
+
+        if (authData.user) {
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', authData.user.id)
+            .single();
+
+          if (profileError) throw profileError;
+
+          if (profile) {
+            onLogin({
+              id: profile.id,
+              name: profile.name,
+              role: profile.role as Role,
+              avatar: profile.avatar
+            });
+          }
+        }
+      }
+    } catch (err: any) {
+      console.error('Auth error:', err);
+      setError(err.message || 'An error occurred during authentication');
+    } finally {
+      setIsAuthenticating(false);
+    }
   };
 
   return (
@@ -40,61 +96,111 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/20 rounded-full blur-[100px] animate-pulse"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-500/10 rounded-full blur-[100px] animate-pulse duration-700"></div>
 
-      {isAuthenticating && (
-        <div className="absolute inset-0 z-[110] bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center animate-in fade-in duration-300">
-          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
-          <p className="text-primary font-black uppercase tracking-widest text-sm animate-pulse">Syncing Portal...</p>
-        </div>
-      )}
-
       <div className="relative z-10 w-full max-w-sm flex flex-col items-center">
         <div className="w-24 h-24 bg-primary rounded-[2.5rem] flex items-center justify-center mb-8 shadow-[0_0_40px_rgba(87,249,6,0.3)] animate-bounce duration-1000">
           <span className="material-symbols-outlined text-black text-5xl font-black filled">bolt</span>
         </div>
 
         <h1 className="text-4xl font-black tracking-tight text-center mb-2">Adventure Portal</h1>
-        <p className="text-text-sec-dark text-center mb-12 font-medium px-4">Connect with your family and start the chaos!</p>
+        <p className="text-text-sec-dark text-center mb-8 font-medium px-4">
+          Connect with your family and start the chaos!
+        </p>
 
-        <div className="w-full space-y-4">
-          <p className="text-xs font-black uppercase tracking-[0.2em] text-center text-primary/60 mb-6">Choose Your Identity</p>
-          
-          {users.map((user) => (
+        <form onSubmit={handleAuth} className="w-full space-y-4 bg-white/5 p-6 rounded-3xl border border-white/10 backdrop-blur-sm">
+          <div className="flex gap-2 mb-4">
             <button
-              key={user.id}
-              onClick={() => handleIdentityLogin(user)}
-              disabled={isAuthenticating}
-              className={`w-full group relative flex items-center gap-4 p-4 bg-white/5 border border-white/10 rounded-2xl transition-all active:scale-95 overflow-hidden ${
-                selectedUserId === user.id ? 'ring-2 ring-primary bg-white/10' : 'hover:bg-white/10 hover:border-primary/50'
-              }`}
+              type="button"
+              onClick={() => setIsSignUp(false)}
+              className={`flex-1 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${!isSignUp ? 'bg-primary text-black' : 'bg-white/5 text-gray-400 hover:bg-white/10'}`}
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/5 to-primary/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
-              <img 
-                src={user.avatar} 
-                className="w-14 h-14 rounded-full border-2 border-primary/20 object-cover" 
-                alt={user.name} 
-              />
-              <div className="flex flex-col items-start">
-                <span className="text-lg font-bold">{user.name}</span>
-                <span className="text-xs text-text-sec-dark font-bold uppercase tracking-widest">{user.role}</span>
-              </div>
-              <span className="material-symbols-outlined ml-auto text-primary opacity-0 group-hover:opacity-100 transition-opacity">login</span>
+              Login
             </button>
-          ))}
-        </div>
+            <button
+              type="button"
+              onClick={() => setIsSignUp(true)}
+              className={`flex-1 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${isSignUp ? 'bg-primary text-black' : 'bg-white/5 text-gray-400 hover:bg-white/10'}`}
+            >
+              Sign Up
+            </button>
+          </div>
 
-        <div className="mt-12 w-full pt-8 border-t border-white/5 flex flex-col items-center gap-4">
-          <button 
-            onClick={handleGoogleLogin}
+          {error && (
+            <div className="p-3 bg-red-500/20 border border-red-500/50 rounded-xl text-red-200 text-xs text-center font-bold">
+              {error}
+            </div>
+          )}
+
+          <div className="space-y-3">
+            {isSignUp && (
+              <>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-primary/80 ml-1">Name</label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Enter your name"
+                    className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary/50 transition-colors"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-primary/80 ml-1">Role</label>
+                  <div className="flex gap-2">
+                    {(['Dad', 'Son'] as const).map((r) => (
+                      <button
+                        key={r}
+                        type="button"
+                        onClick={() => setRole(r)}
+                        className={`flex-1 py-3 rounded-xl border border-white/10 text-sm font-bold transition-all ${role === r ? 'bg-white/20 border-primary/50 text-white' : 'bg-black/20 text-gray-400 hover:bg-black/30'}`}
+                      >
+                        {r}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+
+            <div className="space-y-1">
+              <label className="text-[10px] font-black uppercase tracking-widest text-primary/80 ml-1">Email</label>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="hello@family.fun"
+                className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary/50 transition-colors"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-[10px] font-black uppercase tracking-widest text-primary/80 ml-1">Password</label>
+              <input
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary/50 transition-colors"
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
             disabled={isAuthenticating}
-            className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-white text-black rounded-full font-bold text-sm shadow-xl active:scale-95 transition-transform hover:bg-gray-100 disabled:opacity-50"
+            className="w-full mt-6 bg-primary text-black py-4 rounded-xl font-black text-sm uppercase tracking-widest shadow-lg hover:bg-primary-dark active:scale-95 transition-all disabled:opacity-50 disabled:active:scale-100"
           >
-            <img src="https://www.google.com/favicon.ico" className="w-5 h-5" alt="Google" />
-            Sign in with Google Account
+            {isAuthenticating ? (
+              <span className="flex items-center justify-center gap-2">
+                <span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin"></span>
+                Processing...
+              </span>
+            ) : (
+              isSignUp ? 'Create Account' : 'Enter Portal'
+            )}
           </button>
-          <p className="text-[10px] text-gray-500 text-center px-8 leading-relaxed">
-            By signing in, you agree to embark on potentially embarrassing family adventures.
-          </p>
-        </div>
+        </form>
       </div>
     </div>
   );
