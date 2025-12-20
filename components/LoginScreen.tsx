@@ -98,7 +98,33 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
               avatar: profile.avatar
             });
           } else {
-            throw new Error('Profile not found. Please contact support or try signing up again.');
+            console.warn("User exists but profile missing. Auto-healing...");
+            // Auto-heal: Create default profile
+            const { data: newProfile, error: createError } = await supabase
+              .from('profiles')
+              .insert([{
+                id: authData.user.id,
+                name: 'Adventurer', // Fallback name
+                role: 'Son',        // Fallback role
+                email: authData.user.email,
+                avatar: SON_AVATAR
+              }])
+              .select()
+              .single();
+
+            if (createError) {
+              console.error("Failed to auto-heal profile:", createError);
+              throw new Error('Profile missing and could not be created. Contact support.');
+            }
+
+            if (newProfile) {
+              onLogin({
+                id: newProfile.id,
+                name: newProfile.name,
+                role: newProfile.role as Role,
+                avatar: newProfile.avatar
+              });
+            }
           }
         }
       }
