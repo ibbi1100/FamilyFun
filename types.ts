@@ -16,6 +16,9 @@ export interface Activity {
   xp: number;
   owner: Role | 'Shared';
   emoji: string;
+  status?: 'active' | 'pending_approval' | 'completed';
+  proof_url?: string;
+  created_by?: string;
 }
 
 export enum NavTab {

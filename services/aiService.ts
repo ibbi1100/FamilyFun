@@ -98,3 +98,19 @@ export const generateMysteryActivity = async (duration: string, energy: string):
     return { title: "Pillow Fort Wars", description: "Build the ultimate fortress and defend it!" };
   }
 };
+
+export const generateJudgeCommentary = async (taskTitle: string, isApproved: boolean): Promise<string> => {
+  const prompt = `You are the "Silly Family Judge". A user just sent proof for the task: "${taskTitle}".
+  Verdict: ${isApproved ? "APPROVED" : "REJECTED"}.
+  Write a SHORT, funny 1-sentence commentary on the verdict. 
+  If approved: Be grand but slightly suspicious or over-the-top.
+  If rejected: Be clearly disappointed but funny.
+  Return ONLY the sentence. NO quotes.`;
+
+  try {
+    const text = await getGroqCompletion(prompt, 150);
+    return text.replace(/"/g, '').trim();
+  } catch (error) {
+    return isApproved ? "The Tribunal accepts your offering." : "This evidence is inadmissible!";
+  }
+};

@@ -194,7 +194,7 @@ const App: React.FC = () => {
     setNotification(`Welcome to the Chaos, ${user.name}! 🌟`);
   };
 
-  const handleCompleteMission = async (id: string) => {
+  const handleApprove = async (id: string, judgeComment: string) => {
     const mission = activeMissions.find(m => m.id === id);
     if (mission) {
       // Optimistic update
@@ -203,7 +203,7 @@ const App: React.FC = () => {
 
       const newXP = totalXP + mission.xp;
       setTotalXP(newXP);
-      setNotification(`BOOM! +${mission.xp} XP! ⚡️`);
+      setNotification(`JUDGE: ${judgeComment} (+${mission.xp} XP) 👨‍⚖️`);
 
       // Update DB
       await supabase.from('missions').update({ status: 'completed' }).eq('id', id);
@@ -219,6 +219,31 @@ const App: React.FC = () => {
 
       await supabase.from('profiles').update(updates).eq('id', currentUser?.id);
     }
+  };
+
+  const handleReject = async (id: string) => {
+    // Reset mission to active (clear proof)
+    setActiveMissions(prev => prev.map(m => m.id === id ? { ...m, status: 'active', proof_url: undefined } : m));
+    setNotification("Evidence Rejected! Try again. 📸");
+
+    await supabase
+      .from('missions')
+      .update({ status: 'active', proof_url: null })
+      .eq('id', id);
+  };
+
+  const handleResetSeason = async () => {
+    if (!window.confirm("Are you sure? This will reset EVERYONE'S score to 0.")) return;
+
+    setTotalXP(0);
+    setLevel(1);
+    setNotification("SEASON RESET! 🏁 Start your engines!");
+
+    // Reset all profiles (RPC would be better, but loop/client update works for small family app)
+    // Actually, due to RLS, I can only update MY profile usually unless I am admin.
+    // Assuming 'public' profiles policy allows update, or I only reset mine.
+    // For now, reset CURRENT user only to be safe with RLS, or try global if enabled.
+    await supabase.from('profiles').update({ xp: 0, level: 1, streak: 0 }).neq('id', '00000000-0000-0000-0000-000000000000'); // Valid UUID hack to match all if policy allows
   };
 
   const handleAddChallenge = async (newChallenge: Activity) => {
@@ -289,7 +314,14 @@ const App: React.FC = () => {
                   <ChallengeCreator onCreate={handleAddChallenge} />
                   {activeMissions.length > 0 ? (
                     activeMissions.map(m => (
-                      <MissionCard key={m.id} mission={m} onComplete={handleCompleteMission} />
+                      <MissionCard
+                        key={m.id}
+                        mission={m}
+                        onComplete={() => { }} // Not used directly anymore, flow handled by card
+                        onApprove={handleApprove}
+                        onReject={handleReject}
+                        userRole={currentUser.role}
+                      />
                     ))
                   ) : (
                     <div className="py-20 text-center opacity-50 animate-pulse">
@@ -302,7 +334,14 @@ const App: React.FC = () => {
               ) : (
                 historyMissions.length > 0 ? (
                   historyMissions.map(m => (
-                    <MissionCard key={m.id} mission={m} onComplete={() => { }} isHistory />
+                    <MissionCard
+                      key={m.id}
+                      mission={m}
+                      onComplete={() => { }}
+                      onApprove={() => { }}
+                      onReject={() => { }}
+                      isHistory
+                    />
                   ))
                 ) : (
                   <div className="py-20 text-center opacity-50">
@@ -335,6 +374,14 @@ const App: React.FC = () => {
         user={currentUser}
         otherUserAvatar={otherUser.avatar}
       />
+
+      {/* Admin/Debug: Reset Season Logic (Hidden/Double Tap header or just a small button) */}
+      <button
+        onClick={handleResetSeason}
+        className="fixed top-4 right-20 z-50 opacity-20 hover:opacity-100 text-[10px] bg-red-500 text-white px-2 py-1 rounded"
+      >
+        Reset XP
+      </button>
 
       <div className="flex-1 overflow-y-auto no-scrollbar">
         {renderScreen()}

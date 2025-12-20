@@ -35,7 +35,8 @@ create table missions (
   xp integer,
   owner text check (owner in ('Dad', 'Son', 'Shared')),
   emoji text,
-  status text default 'active' check (status in ('active', 'completed')),
+  proof_url text, -- Verification photo
+  status text default 'active' check (status in ('active', 'pending_approval', 'completed')),
   created_by uuid references auth.users,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
