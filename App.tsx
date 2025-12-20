@@ -21,7 +21,7 @@ import { supabase } from './lib/supabase';
 
 const App: React.FC = () => {
   useEffect(() => {
-    console.log("App Version: v1.2 - Re-verified index.html & Auth - " + new Date().toISOString());
+    console.log("App Version: v1.3 - 409 Conflict Retry Logic - " + new Date().toISOString());
   }, []);
 
   const [activeTab, setActiveTab] = useState<NavTab>(NavTab.Active);
@@ -79,12 +79,12 @@ const App: React.FC = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const fetchProfile = async (userId: string) => {
+  const fetchProfile = async (userId: string, retryCount = 0) => {
     try {
-      console.log("Fetching profile for:", userId);
+      console.log(`Fetching profile for: ${userId} (Attempt ${retryCount + 1})`);
       const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select('id, name, role, avatar, xp, level')
         .eq('id', userId)
         .limit(1);
 
@@ -119,7 +119,19 @@ const App: React.FC = () => {
           .limit(1);
 
         if (createError) {
-          console.error("Failed to auto-heal in App:", createError);
+          // Check for Conflict (409) or Unique Violation (23505)
+          if (createError.code === '23505' || createError.status === 409) {
+            console.log("Profile already exists (409 Conflict). Retrying fetch...");
+            if (retryCount < 3) {
+              // Wait a moment and retry fetch
+              setTimeout(() => fetchProfile(userId, retryCount + 1), 1000);
+            } else {
+              console.error("Max retries reached. Profile exists but cannot be read.");
+              setNotification("Error loading profile. Please refresh.");
+            }
+          } else {
+            console.error("Failed to auto-heal in App:", createError);
+          }
         } else if (newProfileData && newProfileData.length > 0) {
           const newProfile = newProfileData[0];
           setCurrentUser({
@@ -136,7 +148,7 @@ const App: React.FC = () => {
     } catch (error) {
       console.error('Error fetching profile:', error);
     } finally {
-      setLoading(false);
+      if (retryCount === 0) setLoading(false); // Only stop loading on main call, although effectively handled by async flow
     }
   };
 
