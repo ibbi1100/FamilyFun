@@ -26,7 +26,7 @@ const EVENTS = [
   { name: 'Forgot everything', icon: 'question_mark', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-300' }
 ];
 
-const StoryStarter: React.FC = () => {
+const StoryStarter: React.FC<{ onWin: (amount: number) => void }> = ({ onWin }) => {
   const [isSpinning, setIsSpinning] = useState(false);
   const [indices, setIndices] = useState([0, 0, 0]);
   const [fullStory, setFullStory] = useState<string[]>([]);
@@ -90,6 +90,10 @@ const StoryStarter: React.FC = () => {
       const text = await getGroqCompletion(prompt, 100);
 
       setFullStory(prev => [...prev, text || "And then it got even weirder!"]);
+
+      // v3.1 Reward: $1.00 per story step
+      onWin(1.00);
+
     } catch (error) {
       setFullStory(prev => [...prev, "Something else happened!"]);
     } finally {

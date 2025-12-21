@@ -27,7 +27,7 @@ import ChatWindow from './components/ChatWindow';
 
 const App: React.FC = () => {
   useEffect(() => {
-    console.log("App Version: v3.0 - Family Isolation & Rewards - " + new Date().toISOString());
+    console.log("App Version: v3.1 - Story Rewards & Bug Fixes - " + new Date().toISOString());
   }, []);
 
   const [activeTab, setActiveTab] = useState<NavTab>(NavTab.Active);
@@ -398,7 +398,7 @@ const App: React.FC = () => {
       case AppScreen.PlayerStats:
         return <PlayerStats onBack={() => setCurrentScreen(AppScreen.Hub)} currentUser={currentUser} otherUser={otherUser} totalXP={totalXP} level={level} streak={streak} />;
       case AppScreen.StoryStarter:
-        return <StoryStarter />;
+        return <StoryStarter onWin={(amount) => handleGameReward(amount, "Storyteller Bonus!")} />;
       case AppScreen.ScavengerHunt:
         return <ScavengerHunt onBack={() => setCurrentScreen(AppScreen.Hub)} />;
       case AppScreen.MysteryJar:

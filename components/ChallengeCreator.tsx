@@ -18,7 +18,7 @@ const ChallengeCreator: React.FC<ChallengeCreatorProps> = ({ onCreate }) => {
     if (!title.trim()) return;
 
     const newChallenge: Activity = {
-      id: Math.random().toString(36).substr(2, 9),
+      id: crypto.randomUUID(),
       title: title,
       description: "A custom madness challenge from the squad.",
       duration: "5 min",
