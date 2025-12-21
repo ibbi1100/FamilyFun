@@ -55,6 +55,31 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
                         </button>
                     </div>
 
+                    <div className="p-4 bg-purple-500/10 rounded-xl border border-purple-500/30">
+                        <h3 className="font-bold text-purple-600 mb-2">System Diagnostics</h3>
+                        <p className="text-xs opacity-70 mb-4">Verify that the Groq AI service is reachable.</p>
+                        <button
+                            onClick={async () => {
+                                setLoading(true);
+                                setStatus('Ping Groq API...');
+                                try {
+                                    // Direct import here to avoid circular dependencies if any, or just use the lib function
+                                    const { getGroqCompletion } = await import('../lib/groq');
+                                    const res = await getGroqCompletion('Say "OK"', 10);
+                                    setStatus('✅ Success! AI responded: ' + res);
+                                } catch (e: any) {
+                                    setStatus('❌ Error: ' + e.message);
+                                }
+                                setLoading(false);
+                            }}
+                            disabled={loading}
+                            className="w-full py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-bold flex items-center justify-center gap-2"
+                        >
+                            <span className="material-symbols-outlined">network_check</span>
+                            Test AI Connection
+                        </button>
+                    </div>
+
                     <div className="p-4 bg-red-500/10 rounded-xl border border-red-500/30">
                         <h3 className="font-bold text-red-500 mb-2">Danger Zone</h3>
                         <p className="text-xs opacity-70 mb-4">Reset everyone's progress. Cannot be undone.</p>
