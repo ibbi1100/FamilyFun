@@ -54,8 +54,8 @@ const Header: React.FC<HeaderProps> = ({ onOpenMashup, onLogout, totalXP, streak
             <span className="material-symbols-outlined text-primary text-xl">rocket_launch</span>
           </button>
           <div className="bg-black dark:bg-white/10 px-3 py-1.5 rounded-full flex items-center gap-2 border border-primary/20 shadow-lg shadow-primary/5 overflow-hidden">
-            <span className="material-symbols-outlined text-primary text-base filled">emoji_events</span>
-            <p className="text-white font-black text-sm leading-none">{totalXP}</p>
+            <span className="material-symbols-outlined text-primary text-base filled">attach_money</span>
+            <p className="text-white font-black text-sm leading-none">${totalXP.toFixed(2)}</p>
           </div>
         </div>
       </div>

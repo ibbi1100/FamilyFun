@@ -24,7 +24,7 @@ const GoalProgress: React.FC<GoalProgressProps> = ({ xp }) => {
           <div className="absolute top-0 left-0 h-full rounded-full bg-primary shadow-[0_0_12px_rgba(87,249,6,0.5)] transition-all duration-500 ease-out" style={{ width: `${progress}%` }}></div>
           <div className="absolute top-0 left-0 h-full w-full opacity-20" style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(0,0,0,0.1) 5px, rgba(0,0,0,0.1) 10px)' }}></div>
         </div>
-        <p className="text-text-sec-light dark:text-text-sec-dark text-xs font-medium mt-2 text-right">{remaining} pts to unlock</p>
+        <p className="text-text-sec-light dark:text-text-sec-dark text-xs font-medium mt-2 text-right">${remaining.toFixed(2)} to unlock</p>
       </div>
     </div>
   );

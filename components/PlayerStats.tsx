@@ -5,7 +5,7 @@ import { User } from '../types';
 interface PlayerStatsProps {
   onBack: () => void;
   currentUser: User;
-  otherUser: { name: string; avatar: string; role: string };
+  otherUser: { name: string; avatar: string; role: string; email?: string };
   totalXP: number;
   level: number;
   streak: number;
@@ -22,7 +22,8 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ onBack, currentUser, otherUse
       xp: totalXP.toLocaleString(),
       avatar: currentUser.avatar,
       comparison: `Starting the journey!`,
-      completed: '0'
+      completed: '0',
+      email: currentUser.email
     },
     Them: {
       name: otherUser.name,
@@ -31,7 +32,8 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ onBack, currentUser, otherUse
       xp: '0',
       avatar: otherUser.avatar,
       comparison: `Waiting for ${currentUser.name}...`,
-      completed: '0'
+      completed: '0',
+      email: otherUser.email
     }
   };
 
@@ -40,7 +42,7 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ onBack, currentUser, otherUse
   return (
     <div className="flex-1 animate-in fade-in slide-in-from-right-8 duration-500 no-scrollbar overflow-y-auto pb-32">
       <header className="flex items-center justify-between p-4 sticky top-0 z-20 bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md">
-        <button 
+        <button
           onClick={onBack}
           className="p-2 rounded-full bg-white dark:bg-white/10 shadow-sm active:scale-90 transition-transform"
         >
@@ -54,13 +56,13 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ onBack, currentUser, otherUse
 
       <div className="px-6 py-4">
         <div className="flex h-14 w-full items-center justify-center rounded-full bg-gray-200/50 dark:bg-white/5 p-1.5 shadow-inner border border-black/5 dark:border-white/5">
-          <button 
+          <button
             onClick={() => setActiveTab('Me')}
             className={`flex h-full grow items-center justify-center rounded-full px-2 transition-all duration-300 font-black text-sm uppercase tracking-widest ${activeTab === 'Me' ? 'bg-primary shadow-lg text-black' : 'text-gray-500 dark:text-gray-400'}`}
           >
             Me
           </button>
-          <button 
+          <button
             onClick={() => setActiveTab('Them')}
             className={`flex h-full grow items-center justify-center rounded-full px-2 transition-all duration-300 font-black text-sm uppercase tracking-widest ${activeTab === 'Them' ? 'bg-primary shadow-lg text-black' : 'text-gray-500 dark:text-gray-400'}`}
           >
@@ -91,9 +93,9 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ onBack, currentUser, otherUse
       <div className="text-center py-6 relative">
         <div className="flex flex-col items-center">
           <span className="text-primary-dark dark:text-primary text-[64px] font-black leading-none tracking-tighter drop-shadow-sm animate-in zoom-in duration-500">
-            {currentData.xp}
+            ${(typeof currentData.xp === 'string' ? currentData.xp : (Number(currentData.xp)).toFixed(2))}
           </span>
-          <p className="text-xs font-black uppercase tracking-[0.3em] text-gray-400 -mt-2">Global XP</p>
+          <p className="text-xs font-black uppercase tracking-[0.3em] text-gray-400 -mt-2">Net Worth</p>
         </div>
       </div>
 
@@ -120,7 +122,7 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ onBack, currentUser, otherUse
           <span className="material-symbols-outlined text-yellow-500 filled">military_tech</span>
           Trophy Case
         </h3>
-        
+
         <div className="grid grid-cols-3 gap-6">
           {[
             { id: 1, name: 'Sound Master', icon: 'graphic_eq', color: 'text-cyan-500', bg: 'bg-cyan-500/10' },
@@ -129,20 +131,29 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ onBack, currentUser, otherUse
             { id: 4, name: 'Locked', icon: 'lock', color: 'text-gray-400', bg: 'bg-gray-100', locked: true },
           ].map(badge => (
             <div key={badge.id} className={`flex flex-col items-center gap-3 transition-transform hover:scale-105 ${badge.locked ? 'opacity-40 grayscale' : ''}`}>
-               <div className={`w-20 h-20 rounded-3xl ${badge.bg} flex items-center justify-center shadow-lg border-2 border-white/10`}>
-                 <span className={`material-symbols-outlined text-4xl ${badge.color}`}>{badge.icon}</span>
-               </div>
-               <p className="text-[10px] font-black uppercase text-center leading-tight tracking-wider">{badge.name}</p>
+              <div className={`w-20 h-20 rounded-3xl ${badge.bg} flex items-center justify-center shadow-lg border-2 border-white/10`}>
+                <span className={`material-symbols-outlined text-4xl ${badge.color}`}>{badge.icon}</span>
+              </div>
+              <p className="text-[10px] font-black uppercase text-center leading-tight tracking-wider">{badge.name}</p>
             </div>
           ))}
         </div>
 
-        <button 
-          onClick={() => onBack()}
-          className="mt-12 w-full py-5 rounded-[2rem] bg-black dark:bg-white text-white dark:text-black font-black text-lg shadow-xl shadow-black/10 active:scale-95 transition-transform"
-        >
-          BACK TO HUB
-        </button>
+        <div className="grid grid-cols-2 gap-4 mt-8">
+          <button
+            onClick={() => window.location.href = `mailto:${currentData.email || ''}?subject=Message form FamilyFun&body=Hi ${currentData.name}!`}
+            className="py-4 rounded-2xl bg-blue-500 text-white font-bold shadow-lg shadow-blue-500/30 active:scale-95 transition-transform flex items-center justify-center gap-2"
+          >
+            <span className="material-symbols-outlined">mail</span>
+            Send Email
+          </button>
+          <button
+            onClick={() => onBack()}
+            className="py-4 rounded-2xl bg-black dark:bg-white text-white dark:text-black font-bold shadow-lg shadow-black/10 active:scale-95 transition-transform"
+          >
+            BACK
+          </button>
+        </div>
       </div>
     </div>
   );

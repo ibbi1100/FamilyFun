@@ -6,6 +6,7 @@ export interface User {
   name: string;
   role: Role;
   avatar: string;
+  email?: string;
 }
 
 export interface Activity {
@@ -57,11 +58,15 @@ export interface SavedMonster {
 }
 
 export interface UserProfile {
+  id: string;
   name: string;
-  avatar: string;
-  points: number;
+  avatar: string; // URL or emoji
+  date_of_birth?: string; // For age calculation
+  role: Role;
   level: number;
-  streak: number;
+  xp: number;
+  balance?: number; // Added for Economy v2.0
+  email?: string;   // Added for Social v2.0
 }
 
 export type GameContentType = 'joke' | 'charade' | 'dare' | 'story' | 'future';
@@ -73,3 +78,14 @@ export interface GameContent {
   is_used: boolean;
   created_at: string;
 }
+
+export interface Message {
+  id: string;
+  sender_id: string;
+  receiver_id: string;
+  content: string;
+  is_read: boolean;
+  created_at: string;
+}
+
+

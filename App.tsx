@@ -23,6 +23,7 @@ import FutureYourself from './components/FutureYourself';
 import TruthOrDareAI from './components/TruthOrDareAI';
 
 import AdminPanel from './components/AdminPanel';
+import ChatWindow from './components/ChatWindow';
 
 const App: React.FC = () => {
   useEffect(() => {
@@ -34,6 +35,7 @@ const App: React.FC = () => {
   const [activeMissions, setActiveMissions] = useState<Activity[]>([]);
   const [historyMissions, setHistoryMissions] = useState<Activity[]>([]);
   const [showAdmin, setShowAdmin] = useState(false);
+  const [showChat, setShowChat] = useState(false);
 
   // Cleaned up monster state
   const [savedMonsters, setSavedMonsters] = useState<SavedMonster[]>([]);
@@ -45,16 +47,44 @@ const App: React.FC = () => {
   const [level, setLevel] = useState(1);
   const [loading, setLoading] = useState(true);
 
+  // Realtime Unread Count
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const fetchUnread = async () => {
+      const { count } = await supabase
+        .from('messages')
+        .select('*', { count: 'exact', head: true })
+        .eq('receiver_id', currentUser.id)
+        .eq('is_read', false);
+      setUnreadCount(count || 0);
+    };
+
+    fetchUnread();
+
+    const channel = supabase.channel('unread-count')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `receiver_id=eq.${currentUser.id}` }, () => {
+        setUnreadCount(c => c + 1);
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [currentUser]);
+
   const getOtherUser = () => {
     switch (currentUser?.role) {
       case 'Dad':
-        return { name: 'Super Son', avatar: SON_AVATAR, role: 'Son' }; // Default pair
+        return { name: 'Super Son', avatar: SON_AVATAR, role: 'Son', email: 'son@familyfun.app' }; // Default pair
       case 'Mum':
-        return { name: 'Wonder Daughter', avatar: DAUGHTER_AVATAR, role: 'Daughter' }; // Default pair
+        return { name: 'Wonder Daughter', avatar: DAUGHTER_AVATAR, role: 'Daughter', email: 'daughter@familyfun.app' }; // Default pair
       case 'Son':
-        return { name: 'Captain Dad', avatar: DAD_AVATAR, role: 'Dad' };
+        return { name: 'Captain Dad', avatar: DAD_AVATAR, role: 'Dad', email: 'dad@familyfun.app' };
       case 'Daughter':
-        return { name: 'Super Mum', avatar: MUM_AVATAR, role: 'Mum' };
+        return { name: 'Super Mum', avatar: MUM_AVATAR, role: 'Mum', email: 'mum@familyfun.app' };
       default:
         return { name: 'Captain Dad', avatar: DAD_AVATAR, role: 'Dad' };
     }
@@ -93,7 +123,7 @@ const App: React.FC = () => {
       console.log(`Fetching profile for: ${userId} (Attempt ${retryCount + 1})`);
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, name, role, avatar, xp, level')
+        .select('id, name, role, avatar, xp, level, balance')
         .eq('id', userId)
         .limit(1);
 
@@ -104,14 +134,15 @@ const App: React.FC = () => {
 
       if (data && data.length > 0) {
         const profile = data[0];
-        console.log("Profile found:", profile.name);
         setCurrentUser({
           id: profile.id,
           name: profile.name,
           role: profile.role as any,
           avatar: profile.avatar
         });
-        setTotalXP(profile.xp || 0);
+        // v2.0 Economy: Use balance if available, else fallback to xp/10
+        const currentBalance = profile.balance !== undefined ? profile.balance : (profile.xp || 0) / 10;
+        setTotalXP(currentBalance);
         setLevel(profile.level || 1);
       } else {
         console.warn("User logged in but no profile found. Auto-healing...");
@@ -122,7 +153,8 @@ const App: React.FC = () => {
             id: userId,
             name: 'Adventurer',
             role: 'Son',
-            avatar: SON_AVATAR
+            avatar: SON_AVATAR,
+            balance: 0 // Initialize with $0
           }])
           .select()
           .limit(1);
@@ -260,23 +292,17 @@ const App: React.FC = () => {
       setActiveMissions(prev => prev.filter(m => m.id !== id));
       setHistoryMissions(prev => [mission, ...prev]);
 
-      const newXP = totalXP + mission.xp;
-      setTotalXP(newXP);
-      setNotification(`JUDGE: ${judgeComment} (+${mission.xp} XP) 👨‍⚖️`);
+      // Update Profile Balance (v2.0 Economy)
+      // Reward $5.00 for completing a mission (or use mission.xp / 10 if customized)
+      const reward = 5.00;
+      const newBalance = totalXP + reward;
+      setTotalXP(newBalance);
+      setNotification(`JUDGE: ${judgeComment} (+$${reward.toFixed(2)}) 💰`);
 
-      // Update DB
       await supabase.from('missions').update({ status: 'completed' }).eq('id', id);
 
-      // Update Profile XP
-      const nextLevel = Math.floor(newXP / 500) + 1;
-      const updates: any = { xp: newXP };
-      if (nextLevel > level) {
-        setLevel(nextLevel);
-        updates.level = nextLevel;
-        setNotification(`LEVEL UP! You are now Level ${nextLevel}! 🏆`);
-      }
-
-      await supabase.from('profiles').update(updates).eq('id', currentUser?.id);
+      // Save new balance to DB
+      await supabase.from('profiles').update({ balance: newBalance }).eq('id', currentUser?.id);
     }
   };
 
@@ -349,7 +375,7 @@ const App: React.FC = () => {
       case AppScreen.EmojiCharades:
         return <EmojiCharades onBack={() => setCurrentScreen(AppScreen.Hub)} />;
       case AppScreen.DadJokeDuel:
-        return <DadJokeDuel onBack={() => setCurrentScreen(AppScreen.Hub)} />;
+        return <DadJokeDuel onBack={() => setCurrentScreen(AppScreen.Hub)} currentUser={currentUser!} />;
       case AppScreen.FutureYourself:
         return <FutureYourself onBack={() => setCurrentScreen(AppScreen.Hub)} />;
       case AppScreen.TruthOrDareAI:
@@ -452,6 +478,30 @@ const App: React.FC = () => {
       <div className="flex-1 overflow-y-auto no-scrollbar">
         {renderScreen()}
       </div>
+
+
+      {/* Chat FAB */}
+      {!showChat && (
+        <button
+          onClick={() => setShowChat(true)}
+          className="fixed bottom-24 right-4 z-50 w-14 h-14 bg-black dark:bg-white text-white dark:text-black rounded-full shadow-2xl flex items-center justify-center transition-transform hover:scale-105 active:scale-95 border-2 border-primary"
+        >
+          <span className="material-symbols-outlined text-2xl">chat</span>
+          {unreadCount > 0 && (
+            <span className="absolute top-0 right-0 w-5 h-5 bg-red-600 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white dark:border-black animate-bounce">
+              {unreadCount}
+            </span>
+          )}
+        </button>
+      )}
+
+      {showChat && currentUser && (
+        <ChatWindow
+          currentUser={currentUser}
+          onClose={() => setShowChat(false)}
+          onRead={() => setUnreadCount(0)}
+        />
+      )}
 
       <BottomNav
         currentScreen={currentScreen}
