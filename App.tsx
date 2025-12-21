@@ -531,6 +531,7 @@ const App: React.FC = () => {
       {showChat && currentUser && (
         <ChatWindow
           currentUser={currentUser}
+          opponent={otherUser}
           onClose={() => setShowChat(false)}
           onRead={() => setUnreadCount(0)}
         />

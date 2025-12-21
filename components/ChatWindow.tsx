@@ -5,44 +5,59 @@ import { SON_AVATAR, DAD_AVATAR, MUM_AVATAR, DAUGHTER_AVATAR } from '../constant
 
 interface ChatWindowProps {
     currentUser: User;
+    opponent: { id: string; name: string; };
     onClose: () => void;
     onRead?: () => void;
 }
 
-const ChatWindow: React.FC<ChatWindowProps> = ({ currentUser, onClose, onRead }) => {
+const ChatWindow: React.FC<ChatWindowProps> = ({ currentUser, opponent, onClose, onRead }) => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [newMessage, setNewMessage] = useState('');
     const [onlineUsers, setOnlineUsers] = useState<Record<string, any>>({});
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    // Mock users list (In real app, fetch from profiles)
-    const allUsers = [
-        { id: 'dad-id', name: 'Captain Dad', role: 'Dad', avatar: DAD_AVATAR }, // Replace with real IDs
-        { id: 'son-id', name: 'Super Son', role: 'Son', avatar: SON_AVATAR },
-        // Add others if needed
-    ];
-
     // Realtime Chat & Presence
     useEffect(() => {
-        // 1. Fetch recent messages
+        // 1. Fetch recent messages (Between Me AND Them)
         const fetchMessages = async () => {
+            // Logic to fetch conversation specifically with this opponent would be better
+            // But for current simple Global Family Chat (or broadcast), we might just show all?
+            // v2.0 requirement said "Chat Interface".
+            // If we want 1:1, we filter by (sender=me & receiver=them) OR (sender=them & receiver=me).
+            // Given the previous code just grabbed *all* messages limit 50 (ignoring filter), let's stick to simple
+            // broadcast or try to make it 1:1 if possible. 
+            // The previous code: .select('*').order... limit 50. It didn't filter by participants! 
+            // So it was a global chat room.
+            // To fix the "dad-id" UUID error, we just need to ensure we insert VALID UUIDs.
+            // We will continue to use it as a "Family Room" or "1:1" depending on preference.
+            // Let's implement 1:1 filtering for a cleaner experience, OR just fix the insert.
+            // Fixing insert is safest first step.
+
             const { data } = await supabase
                 .from('messages')
                 .select('*')
+                .or(`and(sender_id.eq.${currentUser.id},receiver_id.eq.${opponent.id}),and(sender_id.eq.${opponent.id},receiver_id.eq.${currentUser.id})`)
                 .order('created_at', { ascending: true })
                 .limit(50);
             if (data) setMessages(data as any);
         };
-        fetchMessages();
+        if (opponent.id !== 'placeholder') fetchMessages();
 
-        // 2. Subscribe to Messages
+        // 2. Subscribe
         const msgChannel = supabase.channel('public:messages')
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
-                setMessages(prev => [...prev, payload.new as any]);
+                const newMsg = payload.new as any;
+                // Only add if it belongs to this conversation
+                if (
+                    (newMsg.sender_id === currentUser.id && newMsg.receiver_id === opponent.id) ||
+                    (newMsg.sender_id === opponent.id && newMsg.receiver_id === currentUser.id)
+                ) {
+                    setMessages(prev => [...prev, newMsg]);
+                }
             })
             .subscribe();
 
-        // 3. Subscribe to Presence (Online Status)
+        // ... Presence logic stays same ...
         const presenceChannel = supabase.channel('online-users', {
             config: {
                 presence: {
@@ -56,12 +71,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ currentUser, onClose, onRead })
                 const newState = presenceChannel.presenceState();
                 setOnlineUsers(newState);
             })
-            .on('presence', { event: 'join' }, ({ key, newPresences }) => {
-                console.log('User joined:', key, newPresences);
-            })
-            .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
-                console.log('User left:', key, leftPresences);
-            })
             .subscribe(async (status) => {
                 if (status === 'SUBSCRIBED') {
                     await presenceChannel.track({
@@ -74,10 +83,12 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ currentUser, onClose, onRead })
 
         // 4. Mark messages as read
         const markRead = async () => {
+            if (opponent.id === 'placeholder') return;
             await supabase
                 .from('messages')
                 .update({ is_read: true })
                 .eq('receiver_id', currentUser.id)
+                .eq('sender_id', opponent.id) // Mark messages FROM them as read
                 .eq('is_read', false);
 
             if (onRead) onRead();
@@ -88,7 +99,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ currentUser, onClose, onRead })
             supabase.removeChannel(msgChannel);
             supabase.removeChannel(presenceChannel);
         };
-    }, [currentUser.id]);
+    }, [currentUser.id, opponent.id]);
 
     // Auto-scroll to bottom
     useEffect(() => {
@@ -98,16 +109,23 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ currentUser, onClose, onRead })
     const handleSend = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!newMessage.trim()) return;
+        if (opponent.id === 'placeholder') {
+            alert("No family member selected to chat with!");
+            return;
+        }
 
-        // Optimistic UI could go here, but realtime is fast enough usually
         const { error } = await supabase.from('messages').insert([{
             sender_id: currentUser.id,
-            receiver_id: currentUser.id === 'dad-id' ? 'son-id' : 'dad-id', // Simple 1:1 fallback for now
+            receiver_id: opponent.id,
             content: newMessage,
             is_read: false
         }]);
 
-        if (!error) setNewMessage('');
+        if (error) {
+            console.error("Chat Send Error:", error);
+        } else {
+            setNewMessage('');
+        }
     };
 
     const isOnline = (role: string) => {
@@ -146,8 +164,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ currentUser, onClose, onRead })
                     return (
                         <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'} `}>
                             <div className={`max - w - [80 %] rounded - 2xl px - 3 py - 2 text - sm ${isMe
-                                    ? 'bg-primary text-black rounded-tr-none'
-                                    : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-tl-none'
+                                ? 'bg-primary text-black rounded-tr-none'
+                                : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-tl-none'
                                 } `}>
                                 <p>{msg.content}</p>
                                 <p className="text-[9px] opacity-50 text-right mt-1">
