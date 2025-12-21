@@ -27,7 +27,7 @@ import ChatWindow from './components/ChatWindow';
 
 const App: React.FC = () => {
   useEffect(() => {
-    console.log("App Version: v3.1 - Story Rewards & Bug Fixes - " + new Date().toISOString());
+    console.log("App Version: v4.0 - Multiplayer Logic - " + new Date().toISOString());
   }, []);
 
   const [activeTab, setActiveTab] = useState<NavTab>(NavTab.Active);
@@ -406,7 +406,7 @@ const App: React.FC = () => {
 
       // New Games
       case AppScreen.EmojiCharades:
-        return <EmojiCharades onBack={() => setCurrentScreen(AppScreen.Hub)} onWin={(amount) => handleGameReward(amount, "Emoji Master!")} />;
+        return <EmojiCharades onBack={() => setCurrentScreen(AppScreen.Hub)} onWin={(amount) => handleGameReward(amount, "Emoji Master!")} currentUser={currentUser!} />;
       case AppScreen.DadJokeDuel:
         return <DadJokeDuel onBack={() => setCurrentScreen(AppScreen.Hub)} currentUser={currentUser!} onWin={(amount) => handleGameReward(amount, "Joke Champion!")} />;
       case AppScreen.FutureYourself:
