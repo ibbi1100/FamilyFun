@@ -83,9 +83,15 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ onBack, currentUser, otherUse
         </div>
         <div className="mt-6 text-center">
           <h1 className="text-3xl font-black leading-none mb-2">{currentData.name}</h1>
-          <div className="flex items-center justify-center gap-2">
+          <div className="flex items-center justify-center gap-2 flex-wrap">
             <span className="bg-primary/20 text-primary-dark dark:text-primary px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">{currentData.role}</span>
             <span className="text-text-sec-light dark:text-text-sec-dark text-sm font-bold opacity-80">{currentData.level}</span>
+            {currentUser.family_name && (
+              <span className="bg-purple-500/20 text-purple-600 dark:text-purple-400 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1">
+                <span className="material-symbols-outlined text-[10px]">diversity_3</span>
+                {currentUser.family_name}
+              </span>
+            )}
           </div>
         </div>
       </div>
