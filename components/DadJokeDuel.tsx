@@ -4,7 +4,7 @@ import UserSelectModal from './UserSelectModal';
 import { User, UserProfile } from '../types';
 import { supabase } from '../lib/supabase';
 
-const DadJokeDuel: React.FC<{ onBack: () => void; currentUser: User }> = ({ onBack, currentUser }) => {
+const DadJokeDuel: React.FC<{ onBack: () => void; currentUser: User; onWin: (amount: number) => void }> = ({ onBack, currentUser, onWin }) => {
     const [joke, setJoke] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [showPunchline, setShowPunchline] = useState(false);
@@ -14,8 +14,28 @@ const DadJokeDuel: React.FC<{ onBack: () => void; currentUser: User }> = ({ onBa
     const [opponent, setOpponent] = useState<UserProfile | null>(null);
 
     // Simple score tracking for the session
-    const [p1Score, setP1Score] = useState(5);
-    const [p2Score, setP2Score] = useState(5);
+    const [p1Score, setP1Score] = useState(0); // Start at 0, race to 3
+    const [p2Score, setP2Score] = useState(0);
+
+    const WINNING_SCORE = 3;
+
+    const handlePoint = (player: 'p1' | 'p2') => {
+        if (player === 'p1') {
+            const newScore = p1Score + 1;
+            setP1Score(newScore);
+            if (newScore >= WINNING_SCORE) {
+                // Victory!
+                setTimeout(() => {
+                    alert("🏆 You Won! +$2.00");
+                    onWin(2.00);
+                    setP1Score(0);
+                    setP2Score(0);
+                }, 500);
+            }
+        } else {
+            setP2Score(s => s + 1);
+        }
+    };
 
     const fetchJoke = async () => {
         setLoading(true);
@@ -57,10 +77,13 @@ const DadJokeDuel: React.FC<{ onBack: () => void; currentUser: User }> = ({ onBa
                 <div className="mb-8 flex gap-8 items-center justify-center w-full">
                     <div className="flex flex-col items-center group cursor-pointer transition-transform hover:scale-110">
                         <img src={currentUser.avatar} alt="You" className="w-16 h-16 rounded-full border-4 border-white mb-2 shadow-lg" />
-                        <div className="flex gap-1">
-                            {Array.from({ length: p1Score }).map((_, i) => <div key={i} className="w-2 h-2 rounded-full bg-white shadow-sm"></div>)}
+                        <div className="flex gap-1 justify-center">
+                            {Array.from({ length: 3 }).map((_, i) => (
+                                <div key={i} className={`w-3 h-3 rounded-full ${i < p1Score ? 'bg-yellow-400' : 'bg-white/30'} shadow-sm`}></div>
+                            ))}
                         </div>
-                        <button onClick={() => setP1Score(s => Math.max(0, s - 1))} className="text-[10px] mt-2 bg-black/20 px-3 py-1 rounded-full hover:bg-black/30 transition-colors">You Laugh (-1)</button>
+                        <button onClick={() => handlePoint('p1')} className="text-[10px] mt-2 bg-black/20 px-3 py-1 rounded-full hover:bg-black/30 transition-colors uppercase font-bold">I Laughed (+0)</button>
+                        <button onClick={() => handlePoint('p2')} className="text-[10px] mt-1 bg-white text-orange-600 px-3 py-1 rounded-full hover:bg-white/90 transition-colors uppercase font-bold">They Laughed (+1)</button>
                     </div>
 
                     <div className="text-3xl font-black opacity-30 italic">VS</div>
@@ -73,14 +96,18 @@ const DadJokeDuel: React.FC<{ onBack: () => void; currentUser: User }> = ({ onBa
                                 <span className="material-symbols-outlined text-3xl opacity-50">question_mark</span>
                             </div>
                         )}
-                        <div className="flex gap-1">
-                            {Array.from({ length: p2Score }).map((_, i) => <div key={i} className="w-2 h-2 rounded-full bg-white shadow-sm"></div>)}
+                        <div className="flex gap-1 justify-center">
+                            {Array.from({ length: 3 }).map((_, i) => (
+                                <div key={i} className={`w-3 h-3 rounded-full ${i < p2Score ? 'bg-yellow-400' : 'bg-white/30'} shadow-sm`}></div>
+                            ))}
                         </div>
-                        <button onClick={() => setP2Score(s => Math.max(0, s - 1))} className="text-[10px] mt-2 bg-black/20 px-3 py-1 rounded-full hover:bg-black/30 transition-colors">They Laugh (-1)</button>
+                        <button onClick={() => handlePoint('p2')} className="text-[10px] mt-2 bg-black/20 px-3 py-1 rounded-full hover:bg-black/30 transition-colors uppercase font-bold">They Laughed (+0)</button>
+                        <button onClick={() => handlePoint('p1')} className="text-[10px] mt-1 bg-white text-orange-600 px-3 py-1 rounded-full hover:bg-white/90 transition-colors uppercase font-bold">I Laughed (+1)</button>
                     </div>
                 </div>
 
                 <h2 className="text-3xl font-black mb-8 tracking-tight transform -rotate-2 drop-shadow-md">Dad Joke Duel</h2>
+                <p className="text-white/60 text-xs mb-4 font-bold uppercase tracking-widest">First to 3 laughs wins $2.00</p>
 
                 {!joke && !loading && (
                     <button

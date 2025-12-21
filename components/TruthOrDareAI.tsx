@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { generateTruthOrDare } from '../services/aiService';
 import { Role } from '../types';
 
-const TruthOrDareAI: React.FC<{ onBack: () => void }> = ({ onBack }) => {
+const TruthOrDareAI: React.FC<{ onBack: () => void; onWin: (amount: number) => void }> = ({ onBack, onWin }) => {
     const [data, setData] = useState<{ type: 'Truth' | 'Dare'; content: string } | null>(null);
     const [loading, setLoading] = useState(false);
     const [selectedRole, setSelectedRole] = useState<Role>('Dad');
@@ -13,6 +13,12 @@ const TruthOrDareAI: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         const result = await generateTruthOrDare(selectedRole);
         setLoading(false);
         setData(result);
+    };
+
+    const handleComplete = () => {
+        alert("Brave Soul! +$2.00");
+        onWin(2.00);
+        setData(null);
     };
 
     return (
@@ -52,21 +58,21 @@ const TruthOrDareAI: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
                 {data && !loading && (
                     <div className={`w-full p-8 rounded-[2.5rem] animate-in zoom-in duration-300 border-4 ${data.type === 'Truth' ? 'bg-blue-600 border-blue-400' : 'bg-red-600 border-red-400'}`}>
-                        <div className="text-xs font-black uppercase tracking-[0.3em] opacity-80 mb-2">{data.type}</div>
+                        <div className="text-xs font-black uppercase tracking-[0.3em] opacity-80 mb-2">{data.type} ($2.00)</div>
                         <h3 className="text-2xl font-bold leading-snug mb-8">"{data.content}"</h3>
 
-                        <div className="flex gap-4">
+                        <div className="flex gap-4 flex-col">
                             <button
-                                onClick={spin}
-                                className="flex-1 py-3 bg-black/20 rounded-xl font-bold text-sm hover:bg-black/30 transition-colors"
+                                onClick={handleComplete}
+                                className="w-full py-4 bg-white text-black rounded-xl font-black uppercase tracking-wider hover:bg-gray-100 transition-all shadow-lg"
                             >
-                                Spin Again
+                                I Did It! 💀
                             </button>
                             <button
                                 onClick={() => setData(null)}
-                                className="flex-1 py-3 bg-white text-black rounded-xl font-bold text-sm hover:bg-gray-100 transition-colors"
+                                className="w-full py-3 bg-black/20 text-white rounded-xl font-bold text-sm hover:bg-black/30 transition-colors"
                             >
-                                Done
+                                Skip (Coward)
                             </button>
                         </div>
                     </div>

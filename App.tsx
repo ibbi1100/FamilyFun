@@ -12,7 +12,7 @@ import BottomNav from './components/BottomNav';
 import LoginScreen from './components/LoginScreen';
 import ScavengerHunt from './components/ScavengerHunt';
 import MysteryJar from './components/MysteryJar';
-import { NavTab, Activity, AppScreen, SavedMonster, User } from './types';
+import { NavTab, Activity, AppScreen, SavedMonster, User, UserProfile } from './types';
 import { INITIAL_MISSIONS, SON_AVATAR, DAD_AVATAR, MUM_AVATAR, DAUGHTER_AVATAR } from './constants';
 
 import { supabase } from './lib/supabase';
@@ -27,7 +27,7 @@ import ChatWindow from './components/ChatWindow';
 
 const App: React.FC = () => {
   useEffect(() => {
-    console.log("App Version: v2.2 - Responsive Design Polish - " + new Date().toISOString());
+    console.log("App Version: v3.0 - Family Isolation & Rewards - " + new Date().toISOString());
   }, []);
 
   const [activeTab, setActiveTab] = useState<NavTab>(NavTab.Active);
@@ -75,22 +75,17 @@ const App: React.FC = () => {
     };
   }, [currentUser]);
 
-  const getOtherUser = () => {
-    switch (currentUser?.role) {
-      case 'Dad':
-        return { name: 'Super Son', avatar: SON_AVATAR, role: 'Son', email: 'son@familyfun.app' }; // Default pair
-      case 'Mum':
-        return { name: 'Wonder Daughter', avatar: DAUGHTER_AVATAR, role: 'Daughter', email: 'daughter@familyfun.app' }; // Default pair
-      case 'Son':
-        return { name: 'Captain Dad', avatar: DAD_AVATAR, role: 'Dad', email: 'dad@familyfun.app' };
-      case 'Daughter':
-        return { name: 'Super Mum', avatar: MUM_AVATAR, role: 'Mum', email: 'mum@familyfun.app' };
-      default:
-        return { name: 'Captain Dad', avatar: DAD_AVATAR, role: 'Dad' };
-    }
-  };
+  const [familyMembers, setFamilyMembers] = useState<UserProfile[]>([]);
+  // v3.0: Selectable opponent from family
+  const [selectedOpponentId, setSelectedOpponentId] = useState<string | null>(null);
 
-  const otherUser = getOtherUser();
+  // Derived opponent
+  const otherUser = familyMembers.find(m => m.id === selectedOpponentId) || {
+    id: 'placeholder',
+    name: 'Family Member',
+    avatar: DAD_AVATAR, // Default fallbacks
+    role: 'Dad'
+  };
 
   // Auth & Profile Management
   useEffect(() => {
@@ -123,7 +118,7 @@ const App: React.FC = () => {
       console.log(`Fetching profile for: ${userId} (Attempt ${retryCount + 1})`);
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, name, role, avatar, xp, level, balance')
+        .select('id, name, role, avatar, xp, level, balance, family_name, email')
         .eq('id', userId)
         .limit(1);
 
@@ -138,12 +133,18 @@ const App: React.FC = () => {
           id: profile.id,
           name: profile.name,
           role: profile.role as any,
-          avatar: profile.avatar
+          avatar: profile.avatar,
+          email: profile.email,
+          family_name: profile.family_name
         });
         // v2.0 Economy: Use balance if available, else fallback to xp/10
         const currentBalance = profile.balance !== undefined ? profile.balance : (profile.xp || 0) / 10;
         setTotalXP(currentBalance);
         setLevel(profile.level || 1);
+
+        // v3.0: Fetch Family Members
+        fetchFamilyMembers(profile.family_name || 'The Incredibles', profile.id);
+
       } else {
         console.warn("User logged in but no profile found. Auto-healing...");
 
@@ -154,7 +155,8 @@ const App: React.FC = () => {
             name: 'Adventurer',
             role: 'Son',
             avatar: SON_AVATAR,
-            balance: 0 // Initialize with $0
+            balance: 0, // Initialize with $0
+            family_name: 'The Incredibles' // Default v3 family
           }])
           .select()
           .limit(1);
@@ -180,11 +182,14 @@ const App: React.FC = () => {
             id: newProfile.id,
             name: newProfile.name,
             role: newProfile.role as any,
-            avatar: newProfile.avatar
+            avatar: newProfile.avatar,
+            family_name: 'The Incredibles'
           });
           setTotalXP(0);
           setLevel(1);
           setNotification("Profile restored! Welcome back.");
+          // Fetch family for new user too
+          fetchFamilyMembers('The Incredibles', newProfile.id);
         }
       }
     } catch (error) {
@@ -192,6 +197,46 @@ const App: React.FC = () => {
     } finally {
       if (retryCount === 0) setLoading(false); // Only stop loading on main call, although effectively handled by async flow
     }
+  };
+
+  const fetchFamilyMembers = async (familyName: string, currentUserId: string) => {
+    const { data } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('family_name', familyName)
+      .neq('id', currentUserId); // Exclude self
+
+    if (data) {
+      // Map to UserProfile
+      const members: UserProfile[] = data.map(p => ({
+        id: p.id,
+        name: p.name,
+        role: p.role,
+        avatar: p.avatar,
+        balance: p.balance,
+        email: p.email,
+        family_name: p.family_name,
+        xp: p.xp,
+        level: p.level
+      }));
+      setFamilyMembers(members);
+      // Auto-select first member as opponent if none selected
+      if (members.length > 0 && !selectedOpponentId) {
+        setSelectedOpponentId(members[0].id);
+      }
+    }
+  };
+
+  const handleGameReward = async (amount: number, reason: string) => {
+    if (!currentUser) return;
+    const newBalance = totalXP + amount;
+    setTotalXP(newBalance);
+    setNotification(`${reason} (+$${amount.toFixed(2)}) 💰`);
+
+    // Add Sparkle Effect? (Optional visual polish could go here)
+
+    // Save to DB
+    await supabase.from('profiles').update({ balance: newBalance }).eq('id', currentUser.id);
   };
 
   const handleLogout = async () => {
@@ -204,22 +249,21 @@ const App: React.FC = () => {
     if (!currentUser) return;
 
     const liveSims = [
-      `${otherUser.name} just played a funky sound! 💨`,
-      `${otherUser.name} is in the Monster Lab... 🧪`,
-      `${otherUser.name} challenged you to a Face Off! 👀`,
-      `${otherUser.name} reached a new level! 🚀`,
-      "New Global Challenge available! ⚡️"
+      `${otherUser.name} is online! 🟢`,
+      `New challenge from ${otherUser.name}...`,
     ];
 
     const interval = setInterval(() => {
-      if (Math.random() > 0.6) {
-        const msg = liveSims[Math.floor(Math.random() * liveSims.length)];
+      if (Math.random() > 0.8 && familyMembers.length > 0) {
+        // Pick random family member
+        const randomMember = familyMembers[Math.floor(Math.random() * familyMembers.length)];
+        const msg = `${randomMember.name} earned $5.00! 💰`;
         setNotification(msg);
       }
-    }, 12000);
+    }, 15000);
 
     return () => clearInterval(interval);
-  }, [currentUser, otherUser.name]);
+  }, [currentUser, familyMembers, otherUser.name]);
 
   // Fetch & Subscribe to Missions
   useEffect(() => {
@@ -249,10 +293,6 @@ const App: React.FC = () => {
             // Only add if active
             if ((payload.new as any).status === 'active') {
               setActiveMissions((prev) => [newMission, ...prev]);
-              if (newMission.owner !== currentUser.role && newMission.owner !== 'Shared') {
-                // Notification if created by other user?
-                // Logic already handled by notification effect effectively if we want generic notifications
-              }
             }
           } else if (payload.eventType === 'UPDATE') {
             const updatedMission = payload.new as any;
@@ -292,17 +332,10 @@ const App: React.FC = () => {
       setActiveMissions(prev => prev.filter(m => m.id !== id));
       setHistoryMissions(prev => [mission, ...prev]);
 
-      // Update Profile Balance (v2.0 Economy)
-      // Reward $5.00 for completing a mission (or use mission.xp / 10 if customized)
-      const reward = 5.00;
-      const newBalance = totalXP + reward;
-      setTotalXP(newBalance);
-      setNotification(`JUDGE: ${judgeComment} (+$${reward.toFixed(2)}) 💰`);
+      // Update Profile Balance via new common handler
+      handleGameReward(5.00, `JUDGE: ${judgeComment}`);
 
       await supabase.from('missions').update({ status: 'completed' }).eq('id', id);
-
-      // Save new balance to DB
-      await supabase.from('profiles').update({ balance: newBalance }).eq('id', currentUser?.id);
     }
   };
 
@@ -373,13 +406,13 @@ const App: React.FC = () => {
 
       // New Games
       case AppScreen.EmojiCharades:
-        return <EmojiCharades onBack={() => setCurrentScreen(AppScreen.Hub)} />;
+        return <EmojiCharades onBack={() => setCurrentScreen(AppScreen.Hub)} onWin={(amount) => handleGameReward(amount, "Emoji Master!")} />;
       case AppScreen.DadJokeDuel:
-        return <DadJokeDuel onBack={() => setCurrentScreen(AppScreen.Hub)} currentUser={currentUser!} />;
+        return <DadJokeDuel onBack={() => setCurrentScreen(AppScreen.Hub)} currentUser={currentUser!} onWin={(amount) => handleGameReward(amount, "Joke Champion!")} />;
       case AppScreen.FutureYourself:
         return <FutureYourself onBack={() => setCurrentScreen(AppScreen.Hub)} />;
       case AppScreen.TruthOrDareAI:
-        return <TruthOrDareAI onBack={() => setCurrentScreen(AppScreen.Hub)} />;
+        return <TruthOrDareAI onBack={() => setCurrentScreen(AppScreen.Hub)} onWin={(amount) => handleGameReward(amount, "Dare Completed!")} />;
 
       case AppScreen.Main:
       default:

@@ -7,6 +7,7 @@ export interface User {
   role: Role;
   avatar: string;
   email?: string;
+  family_name?: string;
 }
 
 export interface Activity {

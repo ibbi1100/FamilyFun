@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { generateEmojiCharades } from '../services/aiService';
 
-const EmojiCharades: React.FC<{ onBack: () => void }> = ({ onBack }) => {
+const EmojiCharades: React.FC<{ onBack: () => void; onWin: (amount: number) => void }> = ({ onBack, onWin }) => {
     const [data, setData] = useState<{ title: string; emojis: string } | null>(null);
     const [loading, setLoading] = useState(false);
     const [revealed, setRevealed] = useState(false);
@@ -14,6 +14,12 @@ const EmojiCharades: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         setLoading(false);
     };
 
+    const handleCorrectGuess = () => {
+        alert("Correct! +$1.00");
+        onWin(1.00);
+        startGame(); // Auto restart
+    };
+
     return (
         <div className="flex flex-col h-full bg-indigo-900 text-white p-6 overflow-hidden relative">
             <button onClick={onBack} className="absolute top-6 left-6 z-10 p-2 bg-white/10 rounded-full">
@@ -22,7 +28,7 @@ const EmojiCharades: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
             <div className="flex-1 flex flex-col items-center justify-center text-center">
                 <h2 className="text-3xl font-black mb-2 tracking-tight">Emoji Charades 🕵️</h2>
-                <p className="text-white/60 mb-8 font-medium">Guess the movie or phrase!</p>
+                <p className="text-white/60 mb-8 font-medium">Guess the movie or phrase! Win $1.00</p>
 
                 {!data && !loading && (
                     <button
@@ -45,12 +51,20 @@ const EmojiCharades: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         <div className="text-6xl mb-8 animate-bounce">{data.emojis}</div>
 
                         {!revealed ? (
-                            <button
-                                onClick={() => setRevealed(true)}
-                                className="w-full py-4 bg-emerald-500 text-white rounded-xl font-bold uppercase tracking-wider shadow-lg hover:bg-emerald-400 active:scale-95 transition-all"
-                            >
-                                Reveal Answer
-                            </button>
+                            <div className="flex flex-col gap-3">
+                                <button
+                                    onClick={handleCorrectGuess}
+                                    className="w-full py-4 bg-green-500 text-white rounded-xl font-bold uppercase tracking-wider shadow-lg hover:bg-green-400 active:scale-95 transition-all"
+                                >
+                                    I Guessed It! ($1.00)
+                                </button>
+                                <button
+                                    onClick={() => setRevealed(true)}
+                                    className="w-full py-3 bg-white/10 text-white rounded-xl font-bold uppercase tracking-wider hover:bg-white/20 transition-all"
+                                >
+                                    Reveal Answer
+                                </button>
+                            </div>
                         ) : (
                             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                                 <p className="text-sm text-white/50 font-bold uppercase tracking-widest mb-2">The Answer Is</p>
