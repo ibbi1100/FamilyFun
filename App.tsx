@@ -27,7 +27,7 @@ import ChatWindow from './components/ChatWindow';
 
 const App: React.FC = () => {
   useEffect(() => {
-    console.log("App Version: v1.9 - Dynamic Content Update - " + new Date().toISOString());
+    console.log("App Version: v2.1 - Production Polish (Tailwind Native) - " + new Date().toISOString());
   }, []);
 
   const [activeTab, setActiveTab] = useState<NavTab>(NavTab.Active);
