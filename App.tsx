@@ -333,12 +333,8 @@ const App: React.FC = () => {
           savedMonsterCount={savedMonsters.length}
           otherUserName={otherUser.name}
         />;
-      // case AppScreen.MonsterMashup:
-      //   return <div>Monster Mashup Coming Back Soon!</div>;
       case AppScreen.PlayerStats:
         return <PlayerStats onBack={() => setCurrentScreen(AppScreen.Hub)} currentUser={currentUser} otherUser={otherUser} totalXP={totalXP} level={level} streak={streak} />;
-      // case AppScreen.SillySoundboard:
-      //   return <div>Silly Sounds Coming Back Soon!</div>;
       case AppScreen.StoryStarter:
         return <StoryStarter />;
       case AppScreen.ScavengerHunt:
