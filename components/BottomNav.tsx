@@ -10,7 +10,7 @@ interface BottomNavProps {
 
 const BottomNav: React.FC<BottomNavProps> = ({ currentScreen, onScreenChange, onAddClick }) => {
   return (
-    <nav className="fixed bottom-0 left-0 w-full bg-white dark:bg-surface-dark border-t border-gray-100 dark:border-gray-800 px-6 py-3 flex justify-between items-center z-50 rounded-t-[2rem] shadow-[0_-5px_20px_rgba(0,0,0,0.03)]">
+    <nav className="fixed bottom-0 left-0 right-0 w-full md:w-auto md:bottom-8 md:left-1/2 md:-translate-x-1/2 md:rounded-full md:px-8 md:shadow-2xl bg-white dark:bg-surface-dark border-t md:border border-gray-100 dark:border-gray-800 px-6 py-3 flex justify-between items-center z-50 rounded-t-[2rem] shadow-[0_-5px_20px_rgba(0,0,0,0.03)] max-w-md mx-auto">
       <button
         onClick={() => onScreenChange(AppScreen.Hub)}
         className={`flex flex-col items-center gap-1 p-2 transition-colors ${currentScreen === AppScreen.Hub ? 'text-primary' : 'text-gray-400'}`}

@@ -27,7 +27,7 @@ import ChatWindow from './components/ChatWindow';
 
 const App: React.FC = () => {
   useEffect(() => {
-    console.log("App Version: v2.1 - Production Polish (Tailwind Native) - " + new Date().toISOString());
+    console.log("App Version: v2.2 - Responsive Design Polish - " + new Date().toISOString());
   }, []);
 
   const [activeTab, setActiveTab] = useState<NavTab>(NavTab.Active);
@@ -443,7 +443,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen h-screen flex flex-col transition-colors duration-200 bg-background-light dark:bg-background-dark overflow-hidden font-display">
+    <div className="min-h-screen h-screen flex flex-col transition-colors duration-200 bg-background-light dark:bg-background-dark overflow-hidden font-display max-w-6xl mx-auto shadow-2xl border-x border-gray-100 dark:border-white/5 relative">
       {notification && (
         <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[200] w-[90%] max-w-sm bg-black dark:bg-white text-white dark:text-black font-black px-6 py-4 rounded-3xl shadow-2xl animate-in slide-in-from-top-12 duration-500 flex items-center gap-3">
           <div className="w-2 h-2 rounded-full bg-primary animate-ping"></div>

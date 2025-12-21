@@ -67,25 +67,25 @@ const AdventureHub: React.FC<AdventureHubProps> = ({ onNavigate, savedMonsterCou
         <p className="text-text-sec-light dark:text-text-sec-dark font-medium italic opacity-80">Ready to cause some trouble?</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 px-2">
         {portals.map((portal) => (
           <button
             key={portal.id}
             onClick={() => onNavigate(portal.id)}
-            className={`relative flex flex-col items-start justify-end p-5 h-48 rounded-[2rem] ${portal.color} text-white ${portal.shadow} shadow-2xl hover:scale-[1.03] active:scale-95 transition-all group overflow-hidden border-2 border-white/10`}
+            className={`relative flex flex-col items-start justify-end p-6 h-56 rounded-[2.5rem] ${portal.color} text-white ${portal.shadow} shadow-xl hover:shadow-2xl hover:scale-[1.02] active:scale-95 transition-all duration-300 group overflow-hidden border-4 border-white/10`}
           >
-            <div className="absolute -top-4 -right-4 w-32 h-32 bg-white/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-1000"></div>
+            <div className="absolute -top-8 -right-8 w-40 h-40 bg-white/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700"></div>
             <div className="w-full flex justify-start mb-auto overflow-hidden">
-              <span className="material-symbols-outlined text-5xl opacity-90 group-hover:scale-110 transition-transform duration-500 ease-out">
+              <span className="material-symbols-outlined text-6xl opacity-90 group-hover:rotate-12 transition-transform duration-500 ease-out drop-shadow-lg">
                 {portal.icon}
               </span>
             </div>
-            <div className="text-left relative z-10">
-              <h3 className="text-xl font-black leading-none mb-2">{portal.title}</h3>
-              <p className="text-[10px] font-black opacity-80 uppercase tracking-widest leading-tight">{portal.subtitle}</p>
+            <div className="text-left relative z-10 w-full">
+              <h3 className="text-2xl font-black leading-none mb-1 tracking-tight">{portal.title}</h3>
+              <p className="text-[11px] font-black opacity-80 uppercase tracking-widest">{portal.subtitle}</p>
             </div>
-            <div className="absolute top-4 right-4 bg-white/20 p-2 rounded-full backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity translate-x-2 group-hover:translate-x-0">
-              <span className="material-symbols-outlined text-sm font-black">arrow_forward</span>
+            <div className="absolute top-5 right-5 bg-white/20 p-2.5 rounded-full backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0">
+              <span className="material-symbols-outlined text-base font-black">arrow_forward</span>
             </div>
           </button>
         ))}
