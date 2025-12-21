@@ -21,7 +21,7 @@ import { supabase } from './lib/supabase';
 
 const App: React.FC = () => {
   useEffect(() => {
-    console.log("App Version: v1.6 - AI Fallback Hardening - " + new Date().toISOString());
+    console.log("App Version: v1.7 - Google Auth Added - " + new Date().toISOString());
   }, []);
 
   const [activeTab, setActiveTab] = useState<NavTab>(NavTab.Active);

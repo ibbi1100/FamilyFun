@@ -247,6 +247,38 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
               isSignUp ? 'Create Account' : 'Enter Portal'
             )}
           </button>
+
+          {!isSignUp && (
+            <>
+              <div className="relative flex items-center gap-4 my-4 opacity-50">
+                <div className="h-px bg-white/20 flex-1"></div>
+                <span className="text-[10px] font-black uppercase tracking-widest">OR</span>
+                <div className="h-px bg-white/20 flex-1"></div>
+              </div>
+
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    const { error } = await supabase.auth.signInWithOAuth({
+                      provider: 'google',
+                      options: {
+                        redirectTo: window.location.origin
+                      }
+                    });
+                    if (error) throw error;
+                  } catch (err: any) {
+                    console.error("Google Auth Error:", err);
+                    setError(err.message);
+                  }
+                }}
+                className="w-full bg-white text-black py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-3 hover:bg-gray-100 active:scale-95 transition-all"
+              >
+                <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-5 h-5" alt="Google" />
+                Sign in with Google
+              </button>
+            </>
+          )}
         </form>
       </div>
     </div>
