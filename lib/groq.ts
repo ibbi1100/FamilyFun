@@ -21,7 +21,7 @@ export const getGroqCompletion = async (prompt: string, maxTokens: number = 100)
                     content: prompt,
                 },
             ],
-            model: "llama3-70b-8192", // Fast and high quality
+            model: "llama-3.3-70b-versatile", // Updated to latest supported model
             temperature: 0.7,
             max_tokens: maxTokens,
         });
