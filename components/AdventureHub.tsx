@@ -11,44 +11,44 @@ interface AdventureHubProps {
 const AdventureHub: React.FC<AdventureHubProps> = ({ onNavigate, savedMonsterCount, otherUserName }) => {
   const portals = [
     {
-      id: AppScreen.SillySoundboard,
-      title: 'Silly Sounds',
-      subtitle: `Prank ${otherUserName}!`,
-      icon: 'graphic_eq',
-      color: 'bg-gradient-to-br from-pink-500 to-rose-600',
-      shadow: 'shadow-pink-500/20'
+      id: AppScreen.EmojiCharades,
+      title: 'Emoji Charades',
+      subtitle: `Guess the Movie!`,
+      icon: 'sentiment_satisfied',
+      color: 'bg-gradient-to-br from-indigo-500 to-violet-600',
+      shadow: 'shadow-indigo-500/20'
     },
     {
-      id: AppScreen.MonsterMashup,
-      title: 'Monster Lab',
-      subtitle: `${savedMonsterCount} Creatures Born`,
-      icon: 'rocket_launch',
-      color: 'bg-gradient-to-br from-primary-dark to-emerald-700',
-      shadow: 'shadow-primary/20'
+      id: AppScreen.DadJokeDuel,
+      title: 'Dad Joke Duel',
+      subtitle: `Don't Laugh!`,
+      icon: 'sentiment_very_dissatisfied',
+      color: 'bg-gradient-to-br from-orange-500 to-amber-600',
+      shadow: 'shadow-orange-500/20'
+    },
+    {
+      id: AppScreen.FutureYourself,
+      title: 'Future Mirror',
+      subtitle: 'See your future self',
+      icon: 'magic_button',
+      color: 'bg-gradient-to-br from-cyan-500 to-blue-600',
+      shadow: 'shadow-cyan-500/20'
+    },
+    {
+      id: AppScreen.TruthOrDareAI,
+      title: 'Truth or Dare',
+      subtitle: 'Extreme Family Edition',
+      icon: 'local_fire_department',
+      color: 'bg-gradient-to-br from-red-600 to-rose-700',
+      shadow: 'shadow-red-500/20'
     },
     {
       id: AppScreen.StoryStarter,
       title: 'Story Spinner',
       subtitle: 'Spin a new tale!',
       icon: 'auto_stories',
-      color: 'bg-gradient-to-br from-purple-600 to-indigo-700',
+      color: 'bg-gradient-to-br from-purple-600 to-fuchsia-700',
       shadow: 'shadow-purple-500/20'
-    },
-    {
-      id: AppScreen.ScavengerHunt,
-      title: 'Scavenger Hunt',
-      subtitle: 'Find items IRL!',
-      icon: 'search_check',
-      color: 'bg-gradient-to-br from-yellow-500 to-orange-600',
-      shadow: 'shadow-yellow-500/20'
-    },
-    {
-      id: AppScreen.MysteryJar,
-      title: 'Mystery Jar',
-      subtitle: 'Boredom Buster',
-      icon: 'cookie',
-      color: 'bg-gradient-to-br from-teal-500 to-emerald-600',
-      shadow: 'shadow-teal-500/20'
     },
     {
       id: AppScreen.Main,

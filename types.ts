@@ -28,9 +28,11 @@ export enum NavTab {
 
 export enum AppScreen {
   Main = 'Main',
-  MonsterMashup = 'MonsterMashup',
+  EmojiCharades = 'EmojiCharades',
+  DadJokeDuel = 'DadJokeDuel',
+  FutureYourself = 'FutureYourself',
+  TruthOrDareAI = 'TruthOrDareAI',
   PlayerStats = 'PlayerStats',
-  SillySoundboard = 'SillySoundboard',
   StoryStarter = 'StoryStarter',
   ScavengerHunt = 'ScavengerHunt',
   MysteryJar = 'MysteryJar',

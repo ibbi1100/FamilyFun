@@ -5,9 +5,7 @@ import GoalProgress from './components/GoalProgress';
 import MissionTabs from './components/MissionTabs';
 import MissionCard from './components/MissionCard';
 import ChallengeCreator from './components/ChallengeCreator';
-import MonsterMashup from './components/MonsterMashup';
 import PlayerStats from './components/PlayerStats';
-import SillySoundboard from './components/SillySoundboard';
 import StoryStarter from './components/StoryStarter';
 import AdventureHub from './components/AdventureHub';
 import BottomNav from './components/BottomNav';
@@ -19,16 +17,24 @@ import { INITIAL_MISSIONS, SON_AVATAR, DAD_AVATAR, MUM_AVATAR, DAUGHTER_AVATAR }
 
 import { supabase } from './lib/supabase';
 
+import EmojiCharades from './components/EmojiCharades';
+import DadJokeDuel from './components/DadJokeDuel';
+import FutureYourself from './components/FutureYourself';
+import TruthOrDareAI from './components/TruthOrDareAI';
+
 const App: React.FC = () => {
   useEffect(() => {
-    console.log("App Version: v1.7 - Google Auth Added - " + new Date().toISOString());
+    console.log("App Version: v1.8 - Game Updates Started - " + new Date().toISOString());
   }, []);
 
   const [activeTab, setActiveTab] = useState<NavTab>(NavTab.Active);
   const [currentScreen, setCurrentScreen] = useState<AppScreen>(AppScreen.Hub);
   const [activeMissions, setActiveMissions] = useState<Activity[]>([]);
   const [historyMissions, setHistoryMissions] = useState<Activity[]>([]);
+
+  // Cleaned up monster state
   const [savedMonsters, setSavedMonsters] = useState<SavedMonster[]>([]);
+
   const [totalXP, setTotalXP] = useState(0);
   const [notification, setNotification] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -327,24 +333,29 @@ const App: React.FC = () => {
           savedMonsterCount={savedMonsters.length}
           otherUserName={otherUser.name}
         />;
-      case AppScreen.MonsterMashup:
-        return <MonsterMashup
-          onBack={() => setCurrentScreen(AppScreen.Hub)}
-          onSave={(monster) => {
-            setSavedMonsters(prev => [monster, ...prev]);
-            setNotification(`${monster.name} has been BORN! 🧬`);
-          }}
-        />;
+      // case AppScreen.MonsterMashup:
+      //   return <div>Monster Mashup Coming Back Soon!</div>;
       case AppScreen.PlayerStats:
         return <PlayerStats onBack={() => setCurrentScreen(AppScreen.Hub)} currentUser={currentUser} otherUser={otherUser} totalXP={totalXP} level={level} streak={streak} />;
-      case AppScreen.SillySoundboard:
-        return <SillySoundboard />;
+      // case AppScreen.SillySoundboard:
+      //   return <div>Silly Sounds Coming Back Soon!</div>;
       case AppScreen.StoryStarter:
         return <StoryStarter />;
       case AppScreen.ScavengerHunt:
         return <ScavengerHunt onBack={() => setCurrentScreen(AppScreen.Hub)} />;
       case AppScreen.MysteryJar:
         return <MysteryJar onBack={() => setCurrentScreen(AppScreen.Hub)} />;
+
+      // New Games
+      case AppScreen.EmojiCharades:
+        return <EmojiCharades onBack={() => setCurrentScreen(AppScreen.Hub)} />;
+      case AppScreen.DadJokeDuel:
+        return <DadJokeDuel onBack={() => setCurrentScreen(AppScreen.Hub)} />;
+      case AppScreen.FutureYourself:
+        return <FutureYourself onBack={() => setCurrentScreen(AppScreen.Hub)} />;
+      case AppScreen.TruthOrDareAI:
+        return <TruthOrDareAI onBack={() => setCurrentScreen(AppScreen.Hub)} />;
+
       case AppScreen.Main:
       default:
         return (
@@ -416,7 +427,7 @@ const App: React.FC = () => {
       )}
 
       <Header
-        onOpenMashup={() => setCurrentScreen(AppScreen.MonsterMashup)}
+        onOpenMashup={() => setCurrentScreen(AppScreen.Hub)} // Removed MonsterLab link
         onLogout={handleLogout}
         totalXP={totalXP}
         streak={streak}

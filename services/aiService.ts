@@ -114,3 +114,60 @@ export const generateJudgeCommentary = async (taskTitle: string, isApproved: boo
     return isApproved ? "The Tribunal accepts your offering." : "This evidence is inadmissible!";
   }
 };
+
+// --- New Game Functions ---
+
+export const generateEmojiCharades = async (): Promise<{ title: string; emojis: string }> => {
+  const prompt = `Think of a popular family-friendly movie, book, or phrase. 
+  Convert it into a sequence of 3-5 emojis.
+  Return ONLY valid JSON: { "title": "The Lion King", "emojis": "🦁👑🌅" }. NO markdown.`;
+
+  try {
+    const text = await getGroqCompletion(prompt, 150);
+    const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
+    return JSON.parse(cleanText);
+  } catch (error) {
+    return { title: "Finding Nemo", emojis: "🔍🐠🌊" };
+  }
+};
+
+export const generateDadJoke = async (): Promise<string> => {
+  const prompt = `Tell a cringe-worthy "Dad Joke". Short punchline.
+  Return ONLY the joke. NO quotes/markdown.`;
+
+  try {
+    return (await getGroqCompletion(prompt, 100)).trim();
+  } catch (error) {
+    return "Why don't skeletons fight each other? They don't have the guts.";
+  }
+};
+
+export const generateFutureSelfDescription = async (): Promise<{ title: string; description: string }> => {
+  // Simulating analysis since we can't upload images yet
+  const prompt = `Invent a funny "Future Self" prediction for a family member in 20 years.
+  Include a "Title/Job" and a 1-sentence description.
+  Return ONLY valid JSON: { "title": "Mars Potato Farmer", "description": "You exclusively grow potatoes on the red planet and refuse to eat anything else." }. NO markdown.`;
+
+  try {
+    const text = await getGroqCompletion(prompt, 200);
+    const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
+    return JSON.parse(cleanText);
+  } catch (error) {
+    return { title: "Professional Nap Taker", description: "You have won 3 Olympic Gold Medals in sleeping." };
+  }
+};
+
+export const generateTruthOrDare = async (role: string): Promise<{ type: 'Truth' | 'Dare'; content: string }> => {
+  const prompt = `Generate a family-friendly Truth or Dare challenge for a person with the role: "${role}".
+  If Truth: Make it a funny/embarrassing (safe) question.
+  If Dare: Make it physical or silly.
+  Return ONLY valid JSON: { "type": "Truth" or "Dare", "content": "string" }. NO markdown.`;
+
+  try {
+    const text = await getGroqCompletion(prompt, 150);
+    const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
+    return JSON.parse(cleanText);
+  } catch (error) {
+    return { type: "Dare", content: "Walk like a crab for 1 minute." };
+  }
+};
