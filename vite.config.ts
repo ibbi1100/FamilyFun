@@ -10,7 +10,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
       manifest: {
-        name: 'Adventure Portal',
+        name: 'Family Fun',
         short_name: 'FamilyFun',
         description: 'Connect with your family and start the chaos!',
         theme_color: '#57f906',

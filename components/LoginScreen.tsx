@@ -148,7 +148,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
           <span className="material-symbols-outlined text-black text-5xl font-black filled">bolt</span>
         </div>
 
-        <h1 className="text-4xl font-black tracking-tight text-center mb-2">Adventure Portal</h1>
+        <h1 className="text-4xl font-black tracking-tight text-center mb-2">Family Fun</h1>
         <p className="text-text-sec-dark text-center mb-8 font-medium px-4">
           Connect with your family and start the chaos!
         </p>

@@ -63,7 +63,7 @@ const AdventureHub: React.FC<AdventureHubProps> = ({ onNavigate, savedMonsterCou
   return (
     <div className="flex-1 px-4 py-8 animate-in fade-in slide-in-from-bottom-8 duration-700 pb-32">
       <div className="mb-10 text-center">
-        <h2 className="text-4xl font-black tracking-tight mb-2 bg-gradient-to-r from-primary-dark to-primary bg-clip-text text-transparent">Adventure Portal🌀</h2>
+        <h2 className="text-4xl font-black tracking-tight mb-2 bg-gradient-to-r from-primary-dark to-primary bg-clip-text text-transparent">Family Fun🌀</h2>
         <p className="text-text-sec-light dark:text-text-sec-dark font-medium italic opacity-80">Ready to cause some trouble?</p>
       </div>
 
