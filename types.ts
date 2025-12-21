@@ -63,3 +63,13 @@ export interface UserProfile {
   level: number;
   streak: number;
 }
+
+export type GameContentType = 'joke' | 'charade' | 'dare' | 'story' | 'future';
+
+export interface GameContent {
+  id: string;
+  type: GameContentType;
+  content: any; // JSONB
+  is_used: boolean;
+  created_at: string;
+}

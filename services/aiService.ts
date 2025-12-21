@@ -1,5 +1,38 @@
 import { getGroqCompletion } from "../lib/groq";
-import { Activity } from "../types";
+import { Activity, GameContentType } from "../types";
+import { supabase } from "../lib/supabase";
+
+// Helper: Fetch unplayed content from DB
+const fetchFromDB = async (type: GameContentType): Promise<any | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('game_content')
+      .select('*')
+      .eq('type', type)
+      .eq('is_used', false)
+      .limit(1)
+      // Randomize is hard in Supabase basic select without RPC, 
+      // but we can just picking the first unused one is "random enough" relative to creation
+      // or we can use a small trick if dataset is small. 
+      // For now, let's just grab one. Ideally we'd use .order('random()') but that needs RPC.
+      // We will rely on the fact that we'll mark them used.
+      .maybeSingle();
+
+    if (error || !data) return null;
+
+    // Mark as used immediately to avoid duplicates (optimistic)
+    // In a real app, do this when the user "accepts" the turn.
+    await supabase
+      .from('game_content')
+      .update({ is_used: true })
+      .eq('id', data.id);
+
+    return data.content;
+  } catch (err) {
+    console.error("DB Fetch Error:", err);
+    return null;
+  }
+};
 
 export const generateCrazyChallenge = async (): Promise<Activity> => {
   const owners = ['Dad', 'Son', 'Shared'];
@@ -118,6 +151,14 @@ export const generateJudgeCommentary = async (taskTitle: string, isApproved: boo
 // --- New Game Functions ---
 
 export const generateEmojiCharades = async (): Promise<{ title: string; emojis: string }> => {
+  // 1. Try DB
+  const dbContent = await fetchFromDB('charade');
+  // Since dbContent stores { "movie": "...", "emoji": "..." } and we need title/emojis
+  if (dbContent) {
+    return { title: dbContent.movie, emojis: dbContent.emoji };
+  }
+
+  // 2. Fallback AI
   const prompt = `Think of a popular family-friendly movie, book, or phrase. 
   Convert it into a sequence of 3-5 emojis.
   Return ONLY valid JSON: { "title": "The Lion King", "emojis": "🦁👑🌅" }. NO markdown.`;
@@ -132,6 +173,13 @@ export const generateEmojiCharades = async (): Promise<{ title: string; emojis: 
 };
 
 export const generateDadJoke = async (): Promise<string> => {
+  // 1. Try DB
+  const dbContent = await fetchFromDB('joke'); // Stores { "setup": "...", "punchline": "..." }
+  if (dbContent) {
+    return `${dbContent.setup} ... ${dbContent.punchline}`;
+  }
+
+  // 2. Fallback AI
   const prompt = `Tell a cringe-worthy "Dad Joke". Short punchline.
   Return ONLY the joke. NO quotes/markdown.`;
 
@@ -143,7 +191,15 @@ export const generateDadJoke = async (): Promise<string> => {
 };
 
 export const generateFutureSelfDescription = async (): Promise<{ title: string; description: string }> => {
-  // Simulating analysis since we can't upload images yet
+  // 1. Try DB
+  const dbContent = await fetchFromDB('future'); // Stores { "prediction": "..." } or { "title": "...", "description": "..." }
+  if (dbContent) {
+    // If DB has old format or new format, handle gracefully
+    if (dbContent.description) return dbContent;
+    if (dbContent.prediction) return { title: "Future You", description: dbContent.prediction };
+  }
+
+  // 2. Fallback AI
   const prompt = `Invent a funny "Future Self" prediction for a family member in 20 years.
   Include a "Title/Job" and a 1-sentence description.
   Return ONLY valid JSON: { "title": "Mars Potato Farmer", "description": "You exclusively grow potatoes on the red planet and refuse to eat anything else." }. NO markdown.`;
@@ -158,6 +214,16 @@ export const generateFutureSelfDescription = async (): Promise<{ title: string; 
 };
 
 export const generateTruthOrDare = async (role: string): Promise<{ type: 'Truth' | 'Dare'; content: string }> => {
+  // 1. Try DB
+  // For Truth/Dare, we might want to filter by "role" if we stored it, but our seed data has "role".
+  // Let's try to fetch one.
+  const dbContent = await fetchFromDB('dare'); // We'll just use 'dare' type for now as 'truth' isn't seeded separately yet
+  // Or seeded as 'dare' with { "role": "...", "text": "..." }
+  if (dbContent) {
+    return { type: 'Dare', content: dbContent.text };
+  }
+
+  // 2. Fallback AI
   const prompt = `Generate a family-friendly Truth or Dare challenge for a person with the role: "${role}".
   If Truth: Make it a funny/embarrassing (safe) question.
   If Dare: Make it physical or silly.
@@ -169,5 +235,30 @@ export const generateTruthOrDare = async (role: string): Promise<{ type: 'Truth'
     return JSON.parse(cleanText);
   } catch (error) {
     return { type: "Dare", content: "Walk like a crab for 1 minute." };
+  }
+};
+
+// --- ADMIN REFILL ---
+export const refillGameContent = async (count: number = 5): Promise<string> => {
+  // This runs on client, calling AI multiple times.
+  // In production, this should be an Edge Function.
+  // For now, we loop.
+  let added = 0;
+
+  try {
+    // 1. Jokes
+    const jokesPrompt = `Generate ${count} funny dad jokes in JSON format based on a random topic.
+    Format: [ {"setup": "...", "punchline": "..."} ]`;
+    const jokesText = await getGroqCompletion(jokesPrompt, 1000);
+    const jokes = JSON.parse(jokesText.replace(/```json/g, '').replace(/```/g, '').trim());
+    if (Array.isArray(jokes)) {
+      await supabase.from('game_content').insert(jokes.map(j => ({ type: 'joke', content: j })));
+      added += jokes.length;
+    }
+
+    return `Refilled! Added ${added} new items to the database.`;
+  } catch (err: any) {
+    console.error("Refill Failed:", err);
+    return "Refill failed. AI might be tired.";
   }
 };

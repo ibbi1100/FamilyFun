@@ -83,3 +83,28 @@ $$;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
+
+-- Table for storing pre-generated game content (Jokes, Dares, etc.)
+create table game_content (
+  id uuid default uuid_generate_v4() primary key,
+  type text check (type in ('joke', 'charade', 'dare', 'story', 'future')),
+  content jsonb not null, -- Stores the actual data: { "setup": "...", "punchline": "..." }
+  is_used boolean default false,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- RLS: Everyone can read active content
+alter table game_content enable row level security;
+
+create policy "Anyone can read unused content"
+  on game_content for select
+  using ( true ); -- Optimized for read-heavy
+
+-- dad can insert (refill) and update (mark used)
+create policy "Authenticated users can update usage"
+  on game_content for update
+  using ( auth.role() = 'authenticated' );
+
+create policy "Authenticated users can insert new content"
+  on game_content for insert
+  with check ( auth.role() = 'authenticated' );

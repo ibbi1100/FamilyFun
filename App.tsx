@@ -22,15 +22,18 @@ import DadJokeDuel from './components/DadJokeDuel';
 import FutureYourself from './components/FutureYourself';
 import TruthOrDareAI from './components/TruthOrDareAI';
 
+import AdminPanel from './components/AdminPanel';
+
 const App: React.FC = () => {
   useEffect(() => {
-    console.log("App Version: v1.8 - Game Updates Started - " + new Date().toISOString());
+    console.log("App Version: v1.9 - Dynamic Content Update - " + new Date().toISOString());
   }, []);
 
   const [activeTab, setActiveTab] = useState<NavTab>(NavTab.Active);
   const [currentScreen, setCurrentScreen] = useState<AppScreen>(AppScreen.Hub);
   const [activeMissions, setActiveMissions] = useState<Activity[]>([]);
   const [historyMissions, setHistoryMissions] = useState<Activity[]>([]);
+  const [showAdmin, setShowAdmin] = useState(false);
 
   // Cleaned up monster state
   const [savedMonsters, setSavedMonsters] = useState<SavedMonster[]>([]);
@@ -433,12 +436,18 @@ const App: React.FC = () => {
       />
 
       {/* Admin/Debug: Reset Season Logic (Hidden/Double Tap header or just a small button) */}
-      <button
-        onClick={handleResetSeason}
-        className="fixed top-4 right-20 z-50 opacity-20 hover:opacity-100 text-[10px] bg-red-500 text-white px-2 py-1 rounded"
-      >
-        Reset XP
-      </button>
+      {/* Admin Button (Dad Only) */}
+      {currentUser?.role === 'Dad' && (
+        <button
+          onClick={() => setShowAdmin(true)}
+          className="fixed top-4 right-20 z-50 bg-red-600/80 hover:bg-red-500 text-white px-3 py-1.5 rounded-full text-xs font-black uppercase tracking-wider shadow-lg backdrop-blur-md transition-all active:scale-95 flex items-center gap-1"
+        >
+          <span className="material-symbols-outlined text-sm">security</span>
+          Admin
+        </button>
+      )}
+
+      {showAdmin && <AdminPanel onClose={() => setShowAdmin(false)} />}
 
       <div className="flex-1 overflow-y-auto no-scrollbar">
         {renderScreen()}
