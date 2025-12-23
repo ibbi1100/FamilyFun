@@ -406,9 +406,9 @@ const App: React.FC = () => {
 
       // New Games
       case AppScreen.EmojiCharades:
-        return <EmojiCharades onBack={() => setCurrentScreen(AppScreen.Hub)} onWin={(amount) => handleGameReward(amount, "Emoji Master!")} currentUser={currentUser!} />;
+        return <EmojiCharades onBack={() => setCurrentScreen(AppScreen.Hub)} onWin={(amount) => handleGameReward(amount, "Emoji Master!")} currentUser={currentUser!} familyMembers={familyMembers} />;
       case AppScreen.DadJokeDuel:
-        return <DadJokeDuel onBack={() => setCurrentScreen(AppScreen.Hub)} currentUser={currentUser!} onWin={(amount) => handleGameReward(amount, "Joke Champion!")} />;
+        return <DadJokeDuel onBack={() => setCurrentScreen(AppScreen.Hub)} currentUser={currentUser!} onWin={(amount) => handleGameReward(amount, "Joke Champion!")} familyMembers={familyMembers} />;
       case AppScreen.FutureYourself:
         return <FutureYourself onBack={() => setCurrentScreen(AppScreen.Hub)} />;
       case AppScreen.TruthOrDareAI:

@@ -4,7 +4,7 @@ import UserSelectModal from './UserSelectModal';
 import { User, UserProfile } from '../types';
 import { supabase } from '../lib/supabase';
 
-const DadJokeDuel: React.FC<{ onBack: () => void; currentUser: User; onWin: (amount: number) => void }> = ({ onBack, currentUser, onWin }) => {
+const DadJokeDuel: React.FC<{ onBack: () => void; currentUser: User; onWin: (amount: number) => void; familyMembers: UserProfile[] }> = ({ onBack, currentUser, onWin, familyMembers }) => {
     const [joke, setJoke] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [showPunchline, setShowPunchline] = useState(false);
@@ -51,6 +51,7 @@ const DadJokeDuel: React.FC<{ onBack: () => void; currentUser: User; onWin: (amo
             {showUserSelect && (
                 <UserSelectModal
                     currentUser={currentUser}
+                    users={familyMembers}
                     onClose={() => {
                         if (!opponent) onBack(); // If cancelled without picking, go back
                         else setShowUserSelect(false);
@@ -59,6 +60,8 @@ const DadJokeDuel: React.FC<{ onBack: () => void; currentUser: User; onWin: (amo
                         setOpponent(user);
                         setShowUserSelect(false);
                     }}
+                    actionIcon="swords"
+                    title="Pick Opponent"
                 />
             )}
 

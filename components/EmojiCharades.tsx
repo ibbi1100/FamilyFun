@@ -12,7 +12,7 @@ interface GameState {
     turn_count: number;
 }
 
-const EmojiCharades: React.FC<{ onBack: () => void; onWin: (amount: number) => void; currentUser: User }> = ({ onBack, onWin, currentUser }) => {
+const EmojiCharades: React.FC<{ onBack: () => void; onWin: (amount: number) => void; currentUser: User; familyMembers: UserProfile[] }> = ({ onBack, onWin, currentUser, familyMembers }) => {
     const [view, setView] = useState<'lobby' | 'game'>('lobby');
     const [opponent, setOpponent] = useState<UserProfile | null>(null);
     const [sessionId, setSessionId] = useState<string | null>(null);
@@ -199,8 +199,11 @@ const EmojiCharades: React.FC<{ onBack: () => void; onWin: (amount: number) => v
                 </div>
                 <UserSelectModal
                     currentUser={currentUser}
+                    users={familyMembers}
                     onClose={onBack}
                     onSelect={handleSelectOpponent}
+                    actionIcon="sentiment_satisfied"
+                    title="Pick Partner"
                 />
             </div>
         );
