@@ -1,6 +1,6 @@
 # Chaos Control ⚡️
 
-A gamified family mission app powered by Google Gemini AI.
+A gamified family mission app powered by Groq AI and Supabase.
 
 ## Features
 
@@ -8,7 +8,7 @@ A gamified family mission app powered by Google Gemini AI.
 - **Monster Mashup**: Create silly monsters with randomized parts.
 - **Story Spinner**: AI-powered interactive storytelling.
 - **Silly Soundboard**: Synthesized sound effects engine.
-- **Player Stats**: Track XP, streaks, and levels.
+- **Player Stats**: Track XP, streaks, and levels via Supabase.
 
 ## Tech Stack
 
@@ -16,14 +16,15 @@ A gamified family mission app powered by Google Gemini AI.
 - TypeScript
 - Vite
 - Tailwind CSS
-- Google Gemini API
+- Supabase (Auth, Database, Realtime)
+- Groq Cloud (AI generation)
 
 ## Setup
 
 1. **Clone the repo**
    ```bash
    git clone <repo-url>
-   cd adventure-portal
+   cd FamilyFun
    ```
 
 2. **Install dependencies**
@@ -32,10 +33,15 @@ A gamified family mission app powered by Google Gemini AI.
    ```
 
 3. **Environment Variables**
-   Create a `.env` file in the root directory:
-   ```env
-   API_KEY=your_google_gemini_api_key
+   Copy `.env.example` to `.env.local` and fill in your keys:
+   ```bash
+   cp .env.example .env.local
    ```
+   
+   Required variables:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+   - `VITE_GROQ_API_KEY`
 
 4. **Run Development Server**
    ```bash
@@ -46,12 +52,16 @@ A gamified family mission app powered by Google Gemini AI.
 
 This project includes a `Dockerfile` and `nginx.conf` for easy deployment.
 
-1. **Build Args**: Ensure you pass `API_KEY` as a build argument or environment variable during the build process in your deployment platform.
+1. **Build Args**: Ensure you pass the environment variables as build args.
 2. **Port**: The container exposes port `80`.
 
 ### Docker Build Command
 ```bash
-docker build --build-arg API_KEY=your_key_here -t chaos-control .
+docker build \
+  --build-arg VITE_SUPABASE_URL=... \
+  --build-arg VITE_SUPABASE_ANON_KEY=... \
+  --build-arg VITE_GROQ_API_KEY=... \
+  -t chaos-control .
 ```
 
 ### Docker Run Command
